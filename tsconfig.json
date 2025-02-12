@@ -1,0 +1,6 @@
+{
+  "extends": "@nodecfdi/tsconfig/tsconfig.pkg.json",
+  "compilerOptions": {
+    "types": ["@types/node"]
+  }
+}

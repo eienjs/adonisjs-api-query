@@ -1,0 +1,89 @@
+{
+  "name": "@eienjs/adonisjs-api-query",
+  "description": "Easily build Lucid queries from API requests",
+  "version": "0.0.0",
+  "type": "module",
+  "files": [],
+  "exports": {},
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.7.1",
+    "@commitlint/config-conventional": "^19.7.1",
+    "@nodecfdi/eslint-config": "^2.4.4",
+    "@nodecfdi/prettier-config": "^1.4.1",
+    "@nodecfdi/tsconfig": "^1.7.4",
+    "@types/node": "^22.13.1",
+    "auto-changelog": "^2.5.0",
+    "eslint": "^9.20.1",
+    "husky": "^9.1.7",
+    "is-in-ci": "^1.0.0",
+    "np": "^10.2.0",
+    "prettier": "^3.5.0",
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3"
+  },
+  "author": "Fernando Isidro <luffynando@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/eienjs/adonisjs-api-query",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eienjs/adonisjs-api-query.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eienjs/adonisjs-api-query/issues"
+  },
+  "keywords": [
+    "adonisjs",
+    "lucid",
+    "api",
+    "query",
+    "builder",
+    "filters",
+    "filter",
+    "sort",
+    "includes"
+  ],
+  "engines": {
+    "node": ">=20.6.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
+  "packageManager": "pnpm@10.3.0",
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "prettier": "@nodecfdi/prettier-config/pkg",
+  "publishConfig": {
+    "access": "public",
+    "tag": "latest"
+  },
+  "auto-changelog": {
+    "template": "keepachangelog",
+    "hideCredit": true
+  },
+  "np": {
+    "message": "chore(release): :tada: %s",
+    "tag": "latest",
+    "branch": "main",
+    "testScript": "test:run"
+  },
+  "tsup": {
+    "outdir": "./build",
+    "clean": false,
+    "format": "esm",
+    "dts": true,
+    "target": "esnext"
+  }
+}
