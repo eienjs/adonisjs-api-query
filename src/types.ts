@@ -1,3 +1,5 @@
+import { type LucidModel, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+
 export interface ApiQueryConfigParameters {
   include?: string;
   filter?: string;
@@ -77,3 +79,11 @@ export interface ApiQueryConfig {
 }
 
 export type ResolvedApiQueryConfig = Required<ApiQueryConfig> & { parameters: Required<ApiQueryConfigParameters> };
+
+export interface Sort {
+  handle<Model extends LucidModel, Result = InstanceType<Model>>(
+    query: ModelQueryBuilderContract<Model, Result>,
+    descending: boolean,
+    property: string,
+  ): void;
+}
