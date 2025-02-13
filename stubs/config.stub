@@ -1,5 +1,5 @@
 {{{
-  exports({ to: app.configPath('api_query.ts') })
+  exports({ to: app.configPath('apiquery.ts') })
 }}}
 import { defineConfig } from '@eienjs/adonisjs-api-query'
 

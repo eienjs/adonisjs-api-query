@@ -135,5 +135,8 @@
     "dts": false,
     "sourcemap": true,
     "target": "esnext"
+  },
+  "dependencies": {
+    "collect.js": "^4.36.1"
   }
 }

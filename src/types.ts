@@ -1,3 +1,11 @@
+export interface ApiQueryConfigParameters {
+  include?: string;
+  filter?: string;
+  sort?: string;
+  fields?: string;
+  append?: string;
+}
+
 export interface ApiQueryConfig {
   /**
    * By default the package will use the `include`, `filter`, `sort`
@@ -5,13 +13,7 @@ export interface ApiQueryConfig {
    *
    * You can customize these query string parameters here.
    */
-  parameters?: {
-    include?: string;
-    filter?: string;
-    sort?: string;
-    fields?: string;
-    append?: string;
-  };
+  parameters?: ApiQueryConfigParameters;
 
   /**
    * Related model counts are included using the relationship name suffixed with this string.
@@ -74,4 +76,4 @@ export interface ApiQueryConfig {
   convertFieldNamesToSnakeCase?: boolean;
 }
 
-export type ResolvedApiQueryConfig = Required<ApiQueryConfig>;
+export type ResolvedApiQueryConfig = Required<ApiQueryConfig> & { parameters: Required<ApiQueryConfigParameters> };

@@ -5,7 +5,16 @@ import { ndjson, spec } from '@japa/runner/reporters';
 
 processCLIArgs(process.argv.splice(2));
 configure({
-  files: ['tests/**/*.spec.ts'],
+  suites: [
+    {
+      name: 'unit',
+      files: ['tests/unit/**/*.spec.ts'],
+    },
+    {
+      name: 'functional',
+      files: ['tests/functional/**/*.spec.ts'],
+    },
+  ],
   plugins: [assert()],
   reporters: {
     activated: ['spec'],
