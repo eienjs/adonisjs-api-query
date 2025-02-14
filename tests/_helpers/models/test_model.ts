@@ -1,5 +1,4 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm';
-import { AllowedSort } from '../../../src/allowed_sort.js';
 
 export default class TestModel extends BaseModel {
   @column({ isPrimary: true })
@@ -17,6 +16,3 @@ export default class TestModel extends BaseModel {
   @column()
   declare public isVisible: boolean;
 }
-
-
-void TestModel.query().allowedSorts(['name', 'fullName', AllowedSort.field('salary')]);

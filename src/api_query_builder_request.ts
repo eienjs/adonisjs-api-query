@@ -151,7 +151,7 @@ export class ApiQueryBuilderRequest {
     return new Collection(fields);
   }
 
-  public sorts(): Collection<unknown> {
+  public sorts(): Collection<string> {
     const sortParameterName = this._config.parameters.sort;
 
     let sortParts = this.getRequestData(sortParameterName, {});
@@ -160,7 +160,7 @@ export class ApiQueryBuilderRequest {
       sortParts = sortParts.split(ApiQueryBuilderRequest.getSortsArrayValueDelimiter());
     }
 
-    return new Collection(sortParts).filter();
+    return new Collection<string>(sortParts).filter();
   }
 
   public filters(): Collection<unknown> {

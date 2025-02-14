@@ -10,7 +10,7 @@ export class InvalidSortQuery extends InvalidQuery {
     super(message, { status: ResponseStatus.BadRequest });
   }
 
-  public static filtersNotAllowed(unknownSorts: string[], allowedSorts: string[]): InvalidSortQuery {
+  public static sortsNotAllowed(unknownSorts: string[], allowedSorts: string[]): InvalidSortQuery {
     return new InvalidSortQuery(unknownSorts, allowedSorts);
   }
 }

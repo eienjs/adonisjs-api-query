@@ -80,16 +80,18 @@ export interface ApiQueryConfig {
 
 export type ResolvedApiQueryConfig = Required<ApiQueryConfig> & { parameters: Required<ApiQueryConfigParameters> };
 
-export interface Sort {
-  handle<Model extends LucidModel, Result = InstanceType<Model>>(
-    query: ModelQueryBuilderContract<Model, Result>,
-    descending: boolean,
-    property: string,
-  ): void;
+export interface Sort<Model extends LucidModel> {
+  handle(query: ModelQueryBuilderContract<Model>, descending: boolean, property: string): void;
 }
 
 export type ExtractKeys<T> = T extends object
   ? {
       [K in keyof T & string]: K | (T[K] extends object ? `${K}.${ExtractKeys<T[K]>}` : K);
+    }[keyof T & string]
+  : never;
+
+export type ExtractKeysWithSort<T> = T extends object
+  ? {
+      [K in keyof T & string]: K | (T[K] extends object ? `-${K}.${ExtractKeysWithSort<T[K]>}` : `-${K}`);
     }[keyof T & string]
   : never;
