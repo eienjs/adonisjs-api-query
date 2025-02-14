@@ -4,7 +4,7 @@ import { Collection } from 'collect.js';
 import { type ResolvedApiQueryConfig } from './types.js';
 import { strAfterLast, strBeforeLast } from './utils/helpers.js';
 
-export class QueryBuilderRequest {
+export class ApiQueryBuilderRequest {
   protected static includesArrayValueDelimiter = ',';
 
   protected static appendsArrayValueDelimiter = ',';
@@ -24,55 +24,55 @@ export class QueryBuilderRequest {
   }
 
   public static setIncludesArrayValueDelimiter(includesArrayValueDelimiter: string): void {
-    QueryBuilderRequest.includesArrayValueDelimiter = includesArrayValueDelimiter;
+    this.includesArrayValueDelimiter = includesArrayValueDelimiter;
   }
 
   public static setAppendsArrayValueDelimiter(appendsArrayValueDelimiter: string): void {
-    QueryBuilderRequest.appendsArrayValueDelimiter = appendsArrayValueDelimiter;
+    this.appendsArrayValueDelimiter = appendsArrayValueDelimiter;
   }
 
   public static setFieldsArrayValueDelimiter(fieldsArrayValueDelimiter: string): void {
-    QueryBuilderRequest.fieldsArrayValueDelimiter = fieldsArrayValueDelimiter;
+    this.fieldsArrayValueDelimiter = fieldsArrayValueDelimiter;
   }
 
   public static setSortsArrayValueDelimiter(sortsArrayValueDelimiter: string): void {
-    QueryBuilderRequest.sortsArrayValueDelimiter = sortsArrayValueDelimiter;
+    this.sortsArrayValueDelimiter = sortsArrayValueDelimiter;
   }
 
   public static setFilterArrayValueDelimiter(filterArrayValueDelimiter: string): void {
-    QueryBuilderRequest.filterArrayValueDelimiter = filterArrayValueDelimiter;
+    this.filterArrayValueDelimiter = filterArrayValueDelimiter;
   }
 
   public static getIncludesArrayValueDelimiter(): string {
-    return QueryBuilderRequest.includesArrayValueDelimiter;
+    return this.includesArrayValueDelimiter;
   }
 
   public static getAppendsArrayValueDelimiter(): string {
-    return QueryBuilderRequest.appendsArrayValueDelimiter;
+    return this.appendsArrayValueDelimiter;
   }
 
   public static getFieldsArrayValueDelimiter(): string {
-    return QueryBuilderRequest.fieldsArrayValueDelimiter;
+    return this.fieldsArrayValueDelimiter;
   }
 
   public static getSortsArrayValueDelimiter(): string {
-    return QueryBuilderRequest.sortsArrayValueDelimiter;
+    return this.sortsArrayValueDelimiter;
   }
 
   public static getFilterArrayValueDelimiter(): string {
-    return QueryBuilderRequest.filterArrayValueDelimiter;
+    return this.filterArrayValueDelimiter;
   }
 
   public static resetDelimiters(): void {
-    QueryBuilderRequest.includesArrayValueDelimiter = ',';
-    QueryBuilderRequest.appendsArrayValueDelimiter = ',';
-    QueryBuilderRequest.fieldsArrayValueDelimiter = ',';
-    QueryBuilderRequest.sortsArrayValueDelimiter = ',';
-    QueryBuilderRequest.filterArrayValueDelimiter = ',';
+    this.includesArrayValueDelimiter = ',';
+    this.appendsArrayValueDelimiter = ',';
+    this.fieldsArrayValueDelimiter = ',';
+    this.sortsArrayValueDelimiter = ',';
+    this.filterArrayValueDelimiter = ',';
   }
 
-  public static fromRequest(request: Request): QueryBuilderRequest {
-    return new QueryBuilderRequest(request);
+  public static fromRequest(request: Request): ApiQueryBuilderRequest {
+    return new ApiQueryBuilderRequest(request);
   }
 
   private readonly _request: Request;
@@ -98,7 +98,7 @@ export class QueryBuilderRequest {
     let includeParts = this.getRequestData(includeParameterName, {});
 
     if (typeof includeParts === 'string') {
-      includeParts = includeParts.split(QueryBuilderRequest.getIncludesArrayValueDelimiter());
+      includeParts = includeParts.split(ApiQueryBuilderRequest.getIncludesArrayValueDelimiter());
     }
 
     return new Collection(includeParts).filter();
@@ -110,7 +110,7 @@ export class QueryBuilderRequest {
     let appendParts = this.getRequestData(appendParameterName, {});
 
     if (typeof appendParts === 'string') {
-      appendParts = appendParts.split(QueryBuilderRequest.getAppendsArrayValueDelimiter());
+      appendParts = appendParts.split(ApiQueryBuilderRequest.getAppendsArrayValueDelimiter());
     }
 
     return new Collection(appendParts).filter();
@@ -121,7 +121,7 @@ export class QueryBuilderRequest {
     const fieldsData = this.getRequestData(fieldsParameterName, {});
     const fieldsPerTable = new Collection(
       typeof fieldsData === 'string'
-        ? fieldsData.split(QueryBuilderRequest.getFieldsArrayValueDelimiter())
+        ? fieldsData.split(ApiQueryBuilderRequest.getFieldsArrayValueDelimiter())
         : fieldsData,
     );
 
@@ -140,7 +140,7 @@ export class QueryBuilderRequest {
       }
 
       if (typeof tableFields === 'string') {
-        tableFields = tableFields.split(QueryBuilderRequest.getFieldsArrayValueDelimiter()).map((field) => {
+        tableFields = tableFields.split(ApiQueryBuilderRequest.getFieldsArrayValueDelimiter()).map((field) => {
           return strAfterLast(field, '.');
         });
       }
@@ -157,7 +157,7 @@ export class QueryBuilderRequest {
     let sortParts = this.getRequestData(sortParameterName, {});
 
     if (typeof sortParts === 'string') {
-      sortParts = sortParts.split(QueryBuilderRequest.getSortsArrayValueDelimiter());
+      sortParts = sortParts.split(ApiQueryBuilderRequest.getSortsArrayValueDelimiter());
     }
 
     return new Collection(sortParts).filter();
@@ -196,8 +196,8 @@ export class QueryBuilderRequest {
         .all();
     }
 
-    if (typeof value === 'string' && value.includes(QueryBuilderRequest.getFilterArrayValueDelimiter())) {
-      return value.split(QueryBuilderRequest.getFilterArrayValueDelimiter());
+    if (typeof value === 'string' && value.includes(ApiQueryBuilderRequest.getFilterArrayValueDelimiter())) {
+      return value.split(ApiQueryBuilderRequest.getFilterArrayValueDelimiter());
     }
 
     if (value === 'true') {
