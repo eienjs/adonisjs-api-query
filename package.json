@@ -53,6 +53,7 @@
     "eslint": "^9.20.1",
     "husky": "^9.1.7",
     "is-in-ci": "^1.0.0",
+    "luxon": "^3.5.0",
     "native-copyfiles": "^0.3.2",
     "np": "^10.2.0",
     "prettier": "^3.5.1",

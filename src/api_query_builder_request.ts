@@ -1,7 +1,6 @@
 import { HttpContext, type Request } from '@adonisjs/core/http';
 import app from '@adonisjs/core/services/app';
 import { Collection } from 'collect.js';
-import { type ResolvedApiQueryConfig } from './types.js';
 import { strAfterLast, strBeforeLast } from './utils/helpers.js';
 
 export class ApiQueryBuilderRequest {
@@ -77,24 +76,17 @@ export class ApiQueryBuilderRequest {
 
   private readonly _request: Request;
 
-  private readonly _config: ResolvedApiQueryConfig;
-
-  public constructor(request?: Request, config?: ResolvedApiQueryConfig) {
+  public constructor(request?: Request) {
     if (!request) {
       const ctx = HttpContext.getOrFail();
       request = ctx.request;
     }
 
-    if (!config) {
-      config = app.config.get<ResolvedApiQueryConfig>('apiquery');
-    }
-
     this._request = request;
-    this._config = config;
   }
 
   public includes(): Collection<unknown> {
-    const includeParameterName = this._config.parameters.include;
+    const includeParameterName = app.config.get<string>('apiquery.parameters.include', 'include');
     let includeParts = this.getRequestData(includeParameterName, {});
 
     if (typeof includeParts === 'string') {
@@ -105,7 +97,7 @@ export class ApiQueryBuilderRequest {
   }
 
   public appends(): Collection<unknown> {
-    const appendParameterName = this._config.parameters.append;
+    const appendParameterName = app.config.get<string>('apiquery.parameters.append', 'append');
 
     let appendParts = this.getRequestData(appendParameterName, {});
 
@@ -117,7 +109,7 @@ export class ApiQueryBuilderRequest {
   }
 
   public fields(): Collection<unknown> {
-    const fieldsParameterName = this._config.parameters.fields;
+    const fieldsParameterName = app.config.get<string>('apiquery.parameters.fields', 'fields');
     const fieldsData = this.getRequestData(fieldsParameterName, {});
     const fieldsPerTable = new Collection(
       typeof fieldsData === 'string'
@@ -152,7 +144,7 @@ export class ApiQueryBuilderRequest {
   }
 
   public sorts(): Collection<string> {
-    const sortParameterName = this._config.parameters.sort;
+    const sortParameterName = app.config.get<string>('apiquery.parameters.sort', 'sort');
 
     let sortParts = this.getRequestData(sortParameterName, {});
 
@@ -164,7 +156,7 @@ export class ApiQueryBuilderRequest {
   }
 
   public filters(): Collection<unknown> {
-    const filterParameterName = this._config.parameters.filter;
+    const filterParameterName = app.config.get<string>('apiquery.parameters.filter', 'filter');
 
     const filterParts = this.getRequestData(filterParameterName, {});
 

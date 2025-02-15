@@ -1,10 +1,21 @@
 import { RequestFactory } from '@adonisjs/core/factories/http';
+import { setApp } from '@adonisjs/core/services/app';
+import { type ApplicationService } from '@adonisjs/core/types';
 import { test } from '@japa/runner';
 import collect from 'collect.js';
-import { ApiQueryBuilderRequest } from '../../src/api_query_builder_request.js';
-import { getDefaultConfig } from '../_helpers/test_utils.js';
+import { ApiQueryBuilderRequest } from '../src/api_query_builder_request.js';
+import { setupApp } from './_helpers/test_utils.js';
 
-test.group('query builder request', () => {
+test.group('query builder request', (group) => {
+  let app: ApplicationService;
+
+  group.each.setup(async () => {
+    app = await setupApp();
+    setApp(app);
+
+    return () => app.terminate();
+  });
+
   test('can filter nested records', ({ assert }) => {
     const request = new RequestFactory().create();
     const expected = {
@@ -15,7 +26,7 @@ test.group('query builder request', () => {
       },
     };
     request.updateQs({ filter: expected });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     assert.deepEqual(queryRequest.filters().all(), expected);
   });
@@ -38,7 +49,7 @@ test.group('query builder request', () => {
         },
       },
     };
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     assert.deepEqual(queryRequest.filters().all(), expected);
   });
@@ -65,8 +76,7 @@ test.group('query builder request', () => {
         },
       },
     };
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
-
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
     assert.deepEqual(queryRequest.filters().all(), expected);
   });
 
@@ -75,7 +85,7 @@ test.group('query builder request', () => {
     request.updateQs({
       sort: 'foobar',
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     assert.deepEqual(queryRequest.sorts().all(), ['foobar']);
   });
@@ -85,26 +95,25 @@ test.group('query builder request', () => {
     request.updateBody({
       sort: 'foobar',
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     assert.deepEqual(queryRequest.sorts().all(), ['foobar']);
   });
 
   test('can get different sort query parameter name', ({ assert }) => {
-    const config = getDefaultConfig();
-    config.parameters.sort = 'sorts';
+    app.config.set('apiquery.parameters.sort', 'sorts');
     const request = new RequestFactory().create();
     request.updateBody({
       sorts: 'foobar',
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, config);
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     assert.deepEqual(queryRequest.sorts().all(), ['foobar']);
   });
 
   test('will return an empty collection when no sort query param is specified', ({ assert }) => {
     const request = new RequestFactory().create();
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     assert.isTrue(queryRequest.sorts().isEmpty());
   });
@@ -114,8 +123,7 @@ test.group('query builder request', () => {
     request.updateQs({
       sort: 'foo,bar',
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
-
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
     const expected = collect(['foo', 'bar']);
 
     assert.deepEqual(queryRequest.sorts(), expected);
@@ -129,7 +137,7 @@ test.group('query builder request', () => {
         baz: 'qux',
       },
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     const expected = collect({
       foo: 'bar',
@@ -147,7 +155,7 @@ test.group('query builder request', () => {
         baz: 'qux',
       },
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     const expected = collect({
       foo: 'bar',
@@ -158,8 +166,7 @@ test.group('query builder request', () => {
   });
 
   test('can use different filter query parameter name', ({ assert }) => {
-    const config = getDefaultConfig();
-    config.parameters.filter = 'filters';
+    app.config.set('apiquery.parameters.filter', 'filters');
     const request = new RequestFactory().create();
     request.updateQs({
       filters: {
@@ -167,7 +174,7 @@ test.group('query builder request', () => {
         baz: 'qux',
       },
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, config);
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     const expected = collect({
       foo: 'bar',
@@ -185,7 +192,7 @@ test.group('query builder request', () => {
         baz: null,
       },
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     const expected = collect({
       foo: 'bar',
@@ -197,7 +204,7 @@ test.group('query builder request', () => {
 
   test('will return an empty collection when no filter query params are specified', ({ assert }) => {
     const request = new RequestFactory().create();
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     assert.isTrue(queryRequest.filters().isEmpty());
   });
@@ -210,7 +217,7 @@ test.group('query builder request', () => {
         baz: 'qux,lex',
       },
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     const expected = collect({
       foo: 'bar',
@@ -230,7 +237,7 @@ test.group('query builder request', () => {
         },
       },
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     const expected = collect({
       foo: ['bar', 'baz'],
@@ -247,7 +254,7 @@ test.group('query builder request', () => {
     request.updateQs({
       include: 'foo,bar',
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     const expected = collect(['foo', 'bar']);
 
@@ -259,7 +266,7 @@ test.group('query builder request', () => {
     request.updateBody({
       include: 'foo,bar',
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     const expected = collect(['foo', 'bar']);
 
@@ -267,13 +274,12 @@ test.group('query builder request', () => {
   });
 
   test('can get different include query parameter name', ({ assert }) => {
-    const config = getDefaultConfig();
-    config.parameters.include = 'includes';
+    app.config.set('apiquery.parameters.include', 'includes');
     const request = new RequestFactory().create();
     request.updateBody({
       includes: 'foo,bar',
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, config);
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     const expected = collect(['foo', 'bar']);
 
@@ -282,7 +288,7 @@ test.group('query builder request', () => {
 
   test('will return an empty collection when no include query params are specified', ({ assert }) => {
     const request = new RequestFactory().create();
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     assert.isTrue(queryRequest.includes().isEmpty());
   });
@@ -294,8 +300,7 @@ test.group('query builder request', () => {
         table: 'name,email',
       },
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
-
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
     const expected = collect({ table: ['name', 'email'] });
 
     assert.deepEqual(queryRequest.fields(), expected);
@@ -306,7 +311,7 @@ test.group('query builder request', () => {
     request.updateQs({
       fields: 'name,email,related.id,related.type',
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     const expected = collect({ _: ['name', 'email'], related: ['id', 'type'] });
 
@@ -322,7 +327,7 @@ test.group('query builder request', () => {
         'pivots.posts': 'content',
       },
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     const expected = collect({ 'table': ['name', 'email'], 'pivots': ['id', 'type'], 'pivots.posts': ['content'] });
 
@@ -334,8 +339,7 @@ test.group('query builder request', () => {
     request.updateQs({
       fields: 'id,name,email,pivots.id,pivots.type,pivots.posts.content',
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
-
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
     const expected = collect({ '_': ['id', 'name', 'email'], 'pivots': ['id', 'type'], 'pivots.posts': ['content'] });
 
     assert.deepEqual(queryRequest.fields(), expected);
@@ -348,7 +352,7 @@ test.group('query builder request', () => {
         table: 'name,email',
       },
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     const expected = collect({ table: ['name', 'email'] });
 
@@ -356,15 +360,14 @@ test.group('query builder request', () => {
   });
 
   test('can get different fields parameter name', ({ assert }) => {
-    const config = getDefaultConfig();
-    config.parameters.fields = 'field';
+    app.config.set('apiquery.parameters.fields', 'field');
     const request = new RequestFactory().create();
     request.updateQs({
       field: {
         table: 'name,email',
       },
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, config);
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     const expected = collect({ table: ['name', 'email'] });
 
@@ -376,7 +379,7 @@ test.group('query builder request', () => {
     request.updateQs({
       append: 'foo,bar',
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     const expected = collect(['foo', 'bar']);
 
@@ -384,13 +387,12 @@ test.group('query builder request', () => {
   });
 
   test('can get different append query parameter name', ({ assert }) => {
-    const config = getDefaultConfig();
-    config.parameters.append = 'appendit';
+    app.config.set('apiquery.parameters.append', 'appendit');
     const request = new RequestFactory().create();
     request.updateQs({
       appendit: 'foo,bar',
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, config);
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     const expected = collect(['foo', 'bar']);
 
@@ -399,7 +401,7 @@ test.group('query builder request', () => {
 
   test('will return an empty collection when no append query params are specified', ({ assert }) => {
     const request = new RequestFactory().create();
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     assert.isTrue(queryRequest.appends().isEmpty());
   });
@@ -409,7 +411,7 @@ test.group('query builder request', () => {
     request.updateBody({
       append: 'foo,bar',
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
 
     const expected = collect(['foo', 'bar']);
 
@@ -423,7 +425,7 @@ test.group('query builder request', () => {
         foo: 'values, contain, commas|and are split on vertical| lines',
       },
     });
-    const queryRequest = new ApiQueryBuilderRequest(request, getDefaultConfig());
+    const queryRequest = ApiQueryBuilderRequest.fromRequest(request);
     ApiQueryBuilderRequest.setArrayValueDelimiter('|');
 
     assert.deepEqual(queryRequest.filters().all(), {
