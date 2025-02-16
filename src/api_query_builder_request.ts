@@ -146,7 +146,7 @@ export class ApiQueryBuilderRequest {
   public sorts(): Collection<string> {
     const sortParameterName = app.config.get<string>('apiquery.parameters.sort', 'sort');
 
-    let sortParts = this.getRequestData(sortParameterName, {});
+    let sortParts = this.getRequestData<string[] | string>(sortParameterName, []);
 
     if (typeof sortParts === 'string') {
       sortParts = sortParts.split(ApiQueryBuilderRequest.getSortsArrayValueDelimiter());
@@ -158,7 +158,7 @@ export class ApiQueryBuilderRequest {
   public filters(): Collection<unknown> {
     const filterParameterName = app.config.get<string>('apiquery.parameters.filter', 'filter');
 
-    const filterParts = this.getRequestData(filterParameterName, {});
+    const filterParts = this.getRequestData(filterParameterName, []);
 
     if (typeof filterParts === 'string') {
       return new Collection();

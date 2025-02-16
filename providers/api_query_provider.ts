@@ -4,7 +4,7 @@ import { ModelQueryBuilder } from '@adonisjs/lucid/orm';
 import { type LucidModel } from '@adonisjs/lucid/types/model';
 import { type AllowedSort } from '../src/allowed_sort.js';
 import { type ApiQueryBuilderRequest } from '../src/api_query_builder_request.js';
-import { type ExtractKeys, type ExtractKeysWithSort, type ResolvedApiQueryConfig } from '../src/types.js';
+import { type ResolvedApiQueryConfig, type SortUnionKeyParams } from '../src/types.js';
 
 export default class ApiQueryProvider {
   public constructor(protected app: ApplicationService) {}
@@ -35,21 +35,9 @@ declare module '@adonisjs/lucid/types/model' {
     setRequest(request: Request): this;
     getRequest(): ApiQueryBuilderRequest;
 
-    allowedSorts(...sorts: (ExtractKeys<ModelAttributes<InstanceType<Model>>> | AllowedSort<Model>)[]): this;
-    allowedSorts(sorts: (ExtractKeys<ModelAttributes<InstanceType<Model>>> | AllowedSort<Model>)[]): this;
-    defaultSort(
-      ...sorts: (
-        | AllowedSort<LucidModel>
-        | ExtractKeys<ModelAttributes<InstanceType<Model>>>
-        | ExtractKeysWithSort<ModelAttributes<InstanceType<Model>>>
-      )[]
-    ): this;
-    defaultSort(
-      sorts: (
-        | AllowedSort<LucidModel>
-        | ExtractKeys<ModelAttributes<InstanceType<Model>>>
-        | ExtractKeysWithSort<ModelAttributes<InstanceType<Model>>>
-      )[],
-    ): this;
+    allowedSorts(...sorts: (AllowedSort<Model> | SortUnionKeyParams<Model>)[]): this;
+    allowedSorts(sorts: (AllowedSort<Model> | SortUnionKeyParams<Model>)[]): this;
+    defaultSort(...sorts: (AllowedSort<Model> | SortUnionKeyParams<Model>)[]): this;
+    defaultSort(sorts: (AllowedSort<Model> | SortUnionKeyParams<Model>)[]): this;
   }
 }

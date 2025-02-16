@@ -6,7 +6,6 @@ import { defineConfig as defineLucidConfig } from '@adonisjs/lucid';
 import { type Database } from '@adonisjs/lucid/database';
 import { getActiveTest } from '@japa/runner';
 import { defineConfig } from '../../src/define_config.js';
-import { type ResolvedApiQueryConfig } from '../../src/types.js';
 
 const BASE_URL = new URL('tmp/', import.meta.url);
 
@@ -60,7 +59,7 @@ export const setupApp = async function (
     })
     .create(BASE_URL, {
       importer: (filePath) => {
-        if (filePath.startsWith('./') || filePath.startsWith('../../')) {
+        if (filePath.startsWith('./') || filePath.startsWith('../')) {
           return import(new URL(filePath, BASE_URL).href);
         }
 
@@ -70,8 +69,6 @@ export const setupApp = async function (
 
   const app = ignitor.createApp(env || 'web');
   await app.init().then(() => app.boot());
-
-  getActiveTest()?.cleanup(() => app.terminate());
 
   return app as unknown as ApplicationService;
 };
@@ -94,24 +91,4 @@ export const setupDatabase = async (db: Database) => {
     table.boolean('is_visible').defaultTo(true);
     table.timestamps();
   });
-};
-
-export const getDefaultConfig = (): ResolvedApiQueryConfig => {
-  return {
-    parameters: {
-      include: 'include',
-      filter: 'filter',
-      sort: 'sort',
-      fields: 'fields',
-      append: 'append',
-    },
-    countSuffix: 'Count',
-    existsSuffix: 'Exists',
-    disableInvalidFilterQueryException: false,
-    disableInvalidSortQueryException: false,
-    disableInvalidIncludesQueryException: false,
-    convertRelationNamesToSnakeCasePlural: false,
-    convertRelationTableNameStrategy: false,
-    convertFieldNamesToSnakeCase: false,
-  };
 };

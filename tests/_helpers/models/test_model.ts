@@ -1,4 +1,5 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm';
+import { type DateTime } from 'luxon';
 
 export default class TestModel extends BaseModel {
   @column({ isPrimary: true })
@@ -15,4 +16,10 @@ export default class TestModel extends BaseModel {
 
   @column()
   declare public isVisible: boolean;
+
+  @column.dateTime({ autoCreate: true })
+  declare public createdAt: DateTime;
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare public updatedAt: DateTime | null;
 }

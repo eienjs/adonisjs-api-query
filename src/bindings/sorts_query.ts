@@ -63,7 +63,7 @@ export const extendModelQueryBuilderWithSortsQuery = function (
   });
 
   builder.macro('defaultSort', function (this: ModelQueryBuilderWithAllowedSorts, ...sorts) {
-    if (this.getRequest().sorts().isEmpty()) {
+    if (this.getRequest().sorts().isNotEmpty()) {
       // We've got requested sorts. No need to parse defaults.
 
       return this;

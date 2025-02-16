@@ -8,7 +8,7 @@ coverage
 *.sublime-project
 *.sublime-workspace
 *.log
-tmp
+db.sqlite3
 
 build
 dist

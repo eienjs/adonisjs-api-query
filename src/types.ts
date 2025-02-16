@@ -1,4 +1,4 @@
-import { type LucidModel, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import { type LucidModel, type ModelAttributes, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
 
 export interface ApiQueryConfigParameters {
   include?: string;
@@ -81,17 +81,21 @@ export interface ApiQueryConfig {
 export type ResolvedApiQueryConfig = Required<ApiQueryConfig> & { parameters: Required<ApiQueryConfigParameters> };
 
 export interface Sort<Model extends LucidModel> {
-  handle(query: ModelQueryBuilderContract<Model>, descending: boolean, property: string): void;
+  handle(query: ModelQueryBuilderContract<Model, InstanceType<Model>>, descending: boolean, property: string): void;
 }
 
 export type ExtractKeys<T> = T extends object
   ? {
-      [K in keyof T & string]: K | (T[K] extends object ? `${K}.${ExtractKeys<T[K]>}` : K);
+      [K in keyof T & string]: K;
     }[keyof T & string]
   : never;
 
 export type ExtractKeysWithSort<T> = T extends object
   ? {
-      [K in keyof T & string]: K | (T[K] extends object ? `-${K}.${ExtractKeysWithSort<T[K]>}` : `-${K}`);
+      [K in keyof T & string]: `-${K}`;
     }[keyof T & string]
   : never;
+
+export type SortUnionKeyParams<Model extends LucidModel> =
+  | ExtractKeys<ModelAttributes<InstanceType<Model>>>
+  | ExtractKeysWithSort<ModelAttributes<InstanceType<Model>>>;

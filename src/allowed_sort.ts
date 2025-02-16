@@ -49,7 +49,7 @@ export class AllowedSort<Model extends LucidModel> {
     this.name = name.replace(/^-+/, '');
     this.defaultDirection = AllowedSort.parseSortDirection(name);
     this.sortClass = sortClass;
-    this.internalName = internalName ?? name;
+    this.internalName = internalName ?? this.name;
   }
 
   public sort(query: ModelQueryBuilderContract<Model>, descending?: boolean): void {

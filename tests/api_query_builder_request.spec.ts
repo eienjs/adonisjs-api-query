@@ -418,7 +418,11 @@ test.group('query builder request', (group) => {
     assert.deepEqual(queryRequest.appends(), expected);
   });
 
-  test('takes custom delimiter for splitting request parameters', ({ assert }) => {
+  test('takes custom delimiter for splitting request parameters', ({ assert, cleanup }) => {
+    cleanup(() => {
+      ApiQueryBuilderRequest.resetDelimiters();
+    });
+
     const request = new RequestFactory().create();
     request.updateQs({
       filter: {
