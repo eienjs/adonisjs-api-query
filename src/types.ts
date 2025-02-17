@@ -1,4 +1,5 @@
 import { type LucidModel, type ModelAttributes, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import { type StrictValuesWithoutRaw } from '@adonisjs/lucid/types/querybuilder';
 
 export interface ApiQueryConfigParameters {
   include?: string;
@@ -82,6 +83,14 @@ export type ResolvedApiQueryConfig = Required<ApiQueryConfig> & { parameters: Re
 
 export interface Sort<Model extends LucidModel> {
   handle(query: ModelQueryBuilderContract<Model, InstanceType<Model>>, descending: boolean, property: string): void;
+}
+
+export interface Filter<Model extends LucidModel> {
+  handle(
+    query: ModelQueryBuilderContract<Model, InstanceType<Model>>,
+    value: StrictValuesWithoutRaw | StrictValuesWithoutRaw[],
+    property: string,
+  ): void;
 }
 
 export type ExtractKeys<T> = T extends object
