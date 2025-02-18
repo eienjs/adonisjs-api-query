@@ -11,7 +11,7 @@ export class FiltersExact<Model extends LucidModel> implements Filter<Model> {
 
   public handle(
     query: ModelQueryBuilderContract<Model, InstanceType<Model>>,
-    value: StrictValuesWithoutRaw | StrictValuesWithoutRaw[],
+    value: StrictValuesWithoutRaw,
     property: string,
   ): void {
     if (this.addRelationConstraint && this.isRelationProperty(query, property)) {
@@ -56,10 +56,10 @@ export class FiltersExact<Model extends LucidModel> implements Filter<Model> {
 
   protected withRelationConstraint(
     query: ModelQueryBuilderContract<Model, InstanceType<Model>>,
-    value: StrictValuesWithoutRaw | StrictValuesWithoutRaw[],
+    value: StrictValuesWithoutRaw,
     property: string,
   ): void {
-    const [relation, relationProperty ]= collect(property.split('.')).pipe((parts: Collection<string>) => [
+    const [relation, relationProperty] = collect(property.split('.')).pipe((parts: Collection<string>) => [
       parts.except([parts.last()]).implode('.') as ExtractModelRelations<InstanceType<Model>>,
       parts.last(),
     ]);

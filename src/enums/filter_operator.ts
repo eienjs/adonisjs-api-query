@@ -7,3 +7,5 @@ export const FilterOperator = {
   GreaterThanOrEqual: '>=',
   NotEqual: '<>',
 } as const;
+
+export type FilterOperator = (typeof FilterOperator)[keyof typeof FilterOperator];

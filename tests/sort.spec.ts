@@ -10,21 +10,13 @@ import { SortsField } from '../src/sorts/sorts_field.js';
 import CustomSort from './_helpers/classes/custom_sort.js';
 import { TestModelFactory } from './_helpers/factories/test_model.js';
 import TestModel from './_helpers/models/test_model.js';
-import { setupApp, setupDatabase } from './_helpers/test_utils.js';
+import { createDbModels, setupApp, setupDatabase } from './_helpers/test_utils.js';
 
 const createQueryFromSortRequest = (sort?: string) => {
   const request = new RequestFactory().create();
   request.updateQs(sort ? { sort } : {});
 
   return TestModel.query().setRequest(request);
-};
-
-const createDbModels = async (app: ApplicationService, count: number) => {
-  const db = await app.container.make('lucid.db');
-  await setupDatabase(db);
-  const models = await TestModelFactory.createMany(count);
-
-  return models;
 };
 
 test.group('sort', (group) => {
@@ -38,7 +30,7 @@ test.group('sort', (group) => {
   });
 
   test('can sort a query ascending', async ({ assert }) => {
-    await createDbModels(app, 5);
+    await createDbModels(app, TestModelFactory, 5);
     const query = createQueryFromSortRequest('name').allowedSorts('name');
     const result = await query.exec();
     const originalCollection = new Collection(result);
@@ -55,7 +47,7 @@ test.group('sort', (group) => {
   });
 
   test('can sort a query descending', async ({ assert }) => {
-    await createDbModels(app, 5);
+    await createDbModels(app, TestModelFactory, 5);
     const query = createQueryFromSortRequest('-name').allowedSorts('name');
     const result = await query.exec();
     const originalCollection = new Collection(result);
@@ -66,7 +58,7 @@ test.group('sort', (group) => {
   });
 
   test('can sort a query by alias', async ({ assert }) => {
-    await createDbModels(app, 5);
+    await createDbModels(app, TestModelFactory, 5);
     const query = createQueryFromSortRequest('name-alias').allowedSorts(AllowedSort.field('name-alias', 'name'));
     const result = await query.exec();
     const originalCollection = new Collection(result);
@@ -83,7 +75,7 @@ test.group('sort', (group) => {
   });
 
   test('can allow a descending sort by still sort ascending', async ({ assert }) => {
-    await createDbModels(app, 5);
+    await createDbModels(app, TestModelFactory, 5);
     const query = createQueryFromSortRequest('name').allowedSorts('-name');
     const result = await query.exec();
     const originalCollection = new Collection(result);
@@ -107,7 +99,7 @@ test.group('sort', (group) => {
   // });
 
   test('can sort by sketchy alias if its an allowed sort', async ({ assert }) => {
-    await createDbModels(app, 5);
+    await createDbModels(app, TestModelFactory, 5);
     const query = createQueryFromSortRequest('-sketchy<>sort').allowedSorts(AllowedSort.field('sketchy<>sort', 'name'));
     const result = await query.exec();
     const originalCollection = new Collection(result);
@@ -158,7 +150,7 @@ test.group('sort', (group) => {
   });
 
   test('uses default sort parameter when no sort was requested', async ({ assert }) => {
-    await createDbModels(app, 5);
+    await createDbModels(app, TestModelFactory, 5);
     const request = new RequestFactory().create();
     const query = TestModel.query().setRequest(request).defaultSort('name');
     const result = await query.exec();
@@ -176,7 +168,7 @@ test.group('sort', (group) => {
   });
 
   test('allows default custom sort class parameter', async ({ assert }) => {
-    await createDbModels(app, 5);
+    await createDbModels(app, TestModelFactory, 5);
     const request = new RequestFactory().create();
     const sortClass = new CustomSort();
     const query = TestModel.query()
@@ -267,7 +259,7 @@ test.group('sort', (group) => {
   });
 
   test('resolves queries using property column name', async ({ assert }) => {
-    await createDbModels(app, 5);
+    await createDbModels(app, TestModelFactory, 5);
     const testModel = await TestModelFactory.merge({ name: 'zzzzzz' }).create();
     await testModel.refresh();
     const sort = AllowedSort.custom<typeof TestModel>('nickname', new SortsField(), 'name');

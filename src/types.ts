@@ -88,7 +88,7 @@ export interface Sort<Model extends LucidModel> {
 export interface Filter<Model extends LucidModel> {
   handle(
     query: ModelQueryBuilderContract<Model, InstanceType<Model>>,
-    value: StrictValuesWithoutRaw | StrictValuesWithoutRaw[],
+    value: StrictValuesWithoutRaw | null,
     property: string,
   ): void;
 }

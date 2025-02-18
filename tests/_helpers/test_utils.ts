@@ -4,6 +4,8 @@ import { type ApplicationService } from '@adonisjs/core/types';
 import { type AppEnvironments } from '@adonisjs/core/types/app';
 import { defineConfig as defineLucidConfig } from '@adonisjs/lucid';
 import { type Database } from '@adonisjs/lucid/database';
+import { type FactoryBuilderQueryContract, type FactoryModelContract } from '@adonisjs/lucid/types/factory';
+import { type LucidModel } from '@adonisjs/lucid/types/model';
 import { getActiveTest } from '@japa/runner';
 import { defineConfig } from '../../src/define_config.js';
 
@@ -91,4 +93,16 @@ export const setupDatabase = async (db: Database) => {
     table.boolean('is_visible').defaultTo(true);
     table.timestamps();
   });
+};
+
+export const createDbModels = async <Model extends LucidModel, FactoryModel extends FactoryModelContract<Model>>(
+  app: ApplicationService,
+  factory: FactoryBuilderQueryContract<Model, FactoryModel>,
+  count: number,
+) => {
+  const db = await app.container.make('lucid.db');
+  await setupDatabase(db);
+  const models = await factory.createMany(count);
+
+  return models;
 };
