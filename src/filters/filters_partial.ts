@@ -28,6 +28,8 @@ export class FiltersPartial<Model extends LucidModel> extends FiltersExact<Model
           void subQuery.orWhereRaw(innerSql, innerBindings);
         }
       });
+
+      return;
     }
 
     const [sql, bindings] = this.getWhereRawParameters(value, property, dialect);

@@ -34,7 +34,7 @@ export class FiltersExact<Model extends LucidModel> implements Filter<Model> {
       return column;
     }
 
-    return `${query.model.table}.${column}`;
+    return `${query.model.table}.${query.model.$getColumn(column)?.columnName}`;
   }
 
   protected isRelationProperty(

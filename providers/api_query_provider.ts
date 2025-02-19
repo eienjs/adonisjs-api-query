@@ -46,7 +46,7 @@ declare module '@adonisjs/lucid/types/model' {
     defaultSort(...sorts: (AllowedSort<Model> | SortUnionKeyParams<Model>)[]): this;
     defaultSort(sorts: (AllowedSort<Model> | SortUnionKeyParams<Model>)[]): this;
 
-    allowedFilters(...filters: (AllowedFilter<LucidModel> | ExtractKeys<ModelAttributes<InstanceType<Model>>>)[]): this;
-    allowedFilters(filters: (AllowedFilter<LucidModel> | ExtractKeys<ModelAttributes<InstanceType<Model>>>)[]): this;
+    allowedFilters(...filters: (AllowedFilter<Model> | ExtractKeys<ModelAttributes<InstanceType<Model>>>)[]): this;
+    allowedFilters(filters: (AllowedFilter<Model> | ExtractKeys<ModelAttributes<InstanceType<Model>>>)[]): this;
   }
 }
