@@ -172,12 +172,16 @@ export class ApiQueryBuilderRequest {
   }
 
   protected getFilterValue(value: unknown): unknown {
+    if (value === undefined  || value === null) {
+      return '';
+    }
+
     if (
-      !value ||
+      value === '' ||
       (Array.isArray(value) && value.length === 0) ||
       (typeof value === 'object' && Object.keys(value).length === 0)
     ) {
-      return '';
+      return typeof value === 'object' ? [] : value;
     }
 
     if (Array.isArray(value) || typeof value === 'object') {
