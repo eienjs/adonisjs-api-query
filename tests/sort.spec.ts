@@ -4,6 +4,7 @@ import { type ApplicationService } from '@adonisjs/core/types';
 import { test } from '@japa/runner';
 import { Collection } from 'collect.js';
 import { AllowedSort } from '../src/allowed_sort.js';
+import { ApiQueryBuilderRequest } from '../src/api_query_builder_request.js';
 import { SortDirection } from '../src/enums/sort_direction.js';
 import { InvalidSortQuery } from '../src/exceptions/invalid_sort_query.js';
 import { SortsField } from '../src/sorts/sorts_field.js';
@@ -25,6 +26,7 @@ test.group('sort', (group) => {
   group.each.setup(async () => {
     app = await setupApp();
     setApp(app);
+    ApiQueryBuilderRequest.resetDelimiters();
 
     return () => app.terminate();
   });

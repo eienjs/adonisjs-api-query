@@ -12,6 +12,7 @@ test.group('query builder request', (group) => {
   group.each.setup(async () => {
     app = await setupApp();
     setApp(app);
+    ApiQueryBuilderRequest.resetDelimiters();
 
     return () => app.terminate();
   });
@@ -45,7 +46,7 @@ test.group('query builder request', (group) => {
     const expected = {
       info: {
         foo: {
-          bar: '',
+          bar: null,
         },
       },
     };
@@ -196,7 +197,7 @@ test.group('query builder request', (group) => {
 
     const expected = collect({
       foo: 'bar',
-      baz: '',
+      baz: null,
     });
 
     assert.deepEqual(queryRequest.filters(), expected);

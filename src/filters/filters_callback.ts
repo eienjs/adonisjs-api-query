@@ -6,14 +6,14 @@ export class FiltersCallback<Model extends LucidModel> implements Filter<Model> 
   public constructor(
     private callback: (
       query: ModelQueryBuilderContract<Model>,
-      value: StrictValuesWithoutRaw,
+      value: StrictValuesWithoutRaw | null,
       property: string,
     ) => void,
   ) {}
 
   public handle(
     query: ModelQueryBuilderContract<Model, InstanceType<Model>>,
-    value: StrictValuesWithoutRaw,
+    value: StrictValuesWithoutRaw | null,
     property: string,
   ): void {
     this.callback(query, value, property);

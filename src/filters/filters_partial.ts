@@ -7,7 +7,7 @@ import { FiltersExact } from './filters_exact.js';
 export class FiltersPartial<Model extends LucidModel> extends FiltersExact<Model> implements Filter<Model> {
   public handle(
     query: ModelQueryBuilderContract<Model, InstanceType<Model>>,
-    value: StrictValuesWithoutRaw,
+    value: StrictValuesWithoutRaw | null,
     property: string,
   ): void {
     if (this.addRelationConstraint && this.isRelationProperty(query, property)) {
@@ -41,7 +41,7 @@ export class FiltersPartial<Model extends LucidModel> extends FiltersExact<Model
   }
 
   protected getWhereRawParameters(
-    value: StrictValuesWithoutRaw,
+    value: StrictValuesWithoutRaw | null,
     property: string,
     dialect: DialectContract['name'],
   ): [string, string[]] {

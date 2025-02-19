@@ -95,6 +95,7 @@ export class AllowedFilter<Model extends LucidModel> {
   public static operator<Model extends LucidModel>(
     name: string,
     filterOperator: FilterOperator,
+    boolean: 'and' | 'or' = 'and',
     internalName?: ExtractKeys<ModelAttributes<InstanceType<Model>>>,
     addRelationConstraint = true,
     arrayValueDelimiter?: string,
@@ -103,7 +104,7 @@ export class AllowedFilter<Model extends LucidModel> {
 
     return new AllowedFilter<Model>(
       name,
-      new FiltersOperator<Model>(addRelationConstraint, filterOperator),
+      new FiltersOperator<Model>(addRelationConstraint, filterOperator, boolean),
       internalName,
     );
   }

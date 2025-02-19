@@ -5,6 +5,8 @@ import { type LucidModel, type ModelQueryBuilderContract } from '@adonisjs/lucid
 import { test } from '@japa/runner';
 import collect from 'collect.js';
 import { AllowedFilter } from '../src/allowed_filter.js';
+import { ApiQueryBuilderRequest } from '../src/api_query_builder_request.js';
+import { FilterOperator } from '../src/enums/filter_operator.js';
 import { InvalidFilterQuery } from '../src/exceptions/invalid_filter_query.js';
 import { FiltersExact } from '../src/filters/filters_exact.js';
 import CustomFilter from './_helpers/classes/custom_filter.js';
@@ -34,6 +36,7 @@ test.group('filter', (group) => {
   group.each.setup(async () => {
     app = await setupApp();
     setApp(app);
+    ApiQueryBuilderRequest.resetDelimiters();
 
     return () => app.terminate();
   });
@@ -63,7 +66,6 @@ test.group('filter', (group) => {
   test('can filter models by an record as filter value', async ({ assert }) => {
     const models = await createDbModels(app, TestModelFactory, 5);
     const query = createQueryFromFilterRequest({ name: { first: models.at(0)?.name } }).allowedFilters('name');
-    console.info(query.toQuery());
     const resultModels = await query;
 
     assert.lengthOf(resultModels, 1);
@@ -527,256 +529,215 @@ test.group('filter', (group) => {
     assert.lengthOf(models, 2);
   });
 
-  // TODO: more test for filters
-  // it('does not apply default filter when filter exists and default is set', function () {
-  //   TestModel::create(['name' => 'UniqueJohn UniqueDoe']);
-  //   TestModel::create(['name' => 'UniqueJohn Deer']);
+  test('does not apply default filter when filter exists and default is set', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    await TestModelFactory.merge({ name: 'UniqueJohn UniqueDoe' }).create();
+    await TestModelFactory.merge({ name: 'UniqueJohn Deer' }).create();
+    const models = await createQueryFromFilterRequest({
+      name: 'UniqueDoe',
+    }).allowedFilters(AllowedFilter.partial('name').setDefault('UniqueJohn'));
 
-  //   $models = createQueryFromFilterRequest([
-  //       'name' => 'UniqueDoe',
-  //   ])
-  //       ->allowedFilters(AllowedFilter::partial('name')->default('UniqueJohn'))
-  //       ->get();
+    assert.lengthOf(models, 1);
+  });
 
-  //   expect($models->count())->toEqual(1);
-  // });
+  test('should apply a null default filter value if nothing in request', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    await TestModelFactory.merge({ name: 'UniqueJohn Doe' }).create();
+    await TestModelFactory.merge({ name: null }).create();
+    const models = await createQueryFromFilterRequest({}).allowedFilters(AllowedFilter.exact('name').setDefault(null));
 
-  // it('should apply a null default filter value if nothing in request', function () {
-  //     TestModel::create(['name' => 'UniqueJohn Doe']);
-  //     TestModel::create(['name' => null]);
+    assert.lengthOf(models, 1);
+  });
 
-  //     $models = createQueryFromFilterRequest([])
-  //         ->allowedFilters(AllowedFilter::exact('name')->default(null))
-  //         ->get();
+  test('does not apply default filter when filter exists and default null is set', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    await TestModelFactory.merge({ name: null }).create();
+    await TestModelFactory.merge({ name: 'UniqueJohn Deer' }).create();
+    const models = await createQueryFromFilterRequest({
+      name: 'UniqueJohn Deer',
+    }).allowedFilters(AllowedFilter.exact('name').setDefault(null));
 
-  //     expect($models->count())->toEqual(1);
-  // });
+    assert.lengthOf(models, 1);
+  });
 
-  // it('does not apply default filter when filter exists and default null is set', function () {
-  //     TestModel::create(['name' => null]);
-  //     TestModel::create(['name' => 'UniqueJohn Deer']);
+  test('should apply a nullable filter when filter exists and is null', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    await TestModelFactory.merge({ name: null }).create();
+    await TestModelFactory.merge({ name: 'UniqueJohn Deer' }).create();
+    const query = createQueryFromFilterRequest({
+      name: null,
+    }).allowedFilters(AllowedFilter.exact('name').setNullable());
+    const models = await query.exec();
 
-  //     $models = createQueryFromFilterRequest([
-  //         'name' => 'UniqueJohn Deer',
-  //     ])
-  //         ->allowedFilters(AllowedFilter::exact('name')->default(null))
-  //         ->get();
+    assert.include(query.toQuery(), 'select * from `test_models` where `test_models`.`name` is null');
+    assert.lengthOf(models, 1);
+  });
 
-  //     expect($models->count())->toEqual(1);
-  // });
+  test('should filter by query parameters if a default value is set and unset afterwards', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    await TestModelFactory.merge({ name: 'John Doe' }).create();
 
-  // it('should apply a nullable filter when filter exists and is null', function () {
-  //     DB::enableQueryLog();
+    const filterWithDefault = AllowedFilter.exact<typeof TestModel>('name').setDefault('some default value');
+    const models = await createQueryFromFilterRequest({
+      name: 'John Doe',
+    }).allowedFilters(filterWithDefault.unsetDefault());
 
-  //     TestModel::create(['name' => null]);
-  //     TestModel::create(['name' => 'UniqueJohn Deer']);
+    assert.lengthOf(models, 1);
+  });
 
-  //     $models = createQueryFromFilterRequest([
-  //         'name' => null,
-  //     ])
-  //         ->allowedFilters(AllowedFilter::exact('name')->nullable())
-  //         ->get();
+  test('should not filter at all if a default value is set and unset afterwards', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    const filterWithDefault = AllowedFilter.exact<typeof TestModel>('name').setDefault('some default value');
+    const models = await createQueryFromFilterRequest({}).allowedFilters(filterWithDefault.unsetDefault());
 
-  //     $this->assertQueryLogContains("select * from `test_models` where `test_models`.`name` is null");
-  //     expect($models->count())->toEqual(1);
-  // });
+    assert.lengthOf(models, 5);
+  });
 
-  // it('should apply a nullable filter when filter exists and is set', function () {
-  //     TestModel::create(['name' => null]);
-  //     TestModel::create(['name' => 'UniqueJohn Deer']);
+  test('should apply a filter with a multi-dimensional array value', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    await TestModelFactory.merge({ name: 'John Doe' }).create();
+    const models = await createQueryFromFilterRequest({
+      conditions: [
+        {
+          attribute: 'name',
+          operator: '=',
+          value: 'John Doe',
+        },
+      ],
+    }).allowedFilters(
+      AllowedFilter.callback('conditions', (query, conditions) => {
+        for (const condition of conditions as { attribute: string; operator: string; value: string }[]) {
+          void query.where(condition.attribute, condition.operator, condition.value);
+        }
+      }),
+    );
 
-  //     $models = createQueryFromFilterRequest([
-  //         'name' => 'UniqueJohn Deer',
-  //     ])
-  //         ->allowedFilters(AllowedFilter::exact('name')->nullable())
-  //         ->get();
+    assert.lengthOf(models, 1);
+  });
 
-  //     expect($models->count())->toEqual(1);
-  // });
+  test('can override the array value delimiter for single filters', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    await TestModelFactory.merge({ name: '>XZII/Q1On' }).create();
+    await TestModelFactory.merge({ name: 'h4S4MG3(+>azv4z/I<o>' }).create();
+    // First use default delimiter
+    let models = await createQueryFromFilterRequest({
+      ref_id: 'h4S4MG3(+>azv4z/I<o>,>XZII/Q1On',
+    }).allowedFilters(AllowedFilter.exact('ref_id', 'name', true));
 
-  // it('should filter by query parameters if a default value is set and unset afterwards', function () {
-  //     TestModel::create(['name' => 'John Doe']);
+    assert.lengthOf(models, 2);
 
-  //     $filterWithDefault = AllowedFilter::exact('name')->default('some default value');
-  //     $models = createQueryFromFilterRequest([
-  //         'name' => 'John Doe',
-  //     ])
-  //         ->allowedFilters($filterWithDefault->unsetDefault())
-  //         ->get();
+    // Custom delimiter
+    models = await createQueryFromFilterRequest({
+      ref_id: 'h4S4MG3(+>azv4z/I<o>|>XZII/Q1On',
+    }).allowedFilters(AllowedFilter.exact('ref_id', 'name', true, '|'));
 
-  //     expect($models->count())->toEqual(1);
-  // });
+    assert.lengthOf(models, 2);
 
-  // it('should not filter at all if a default value is set and unset afterwards', function () {
-  //     $filterWithDefault = AllowedFilter::exact('name')->default('some default value');
-  //     $models = createQueryFromFilterRequest([])
-  //         ->allowedFilters($filterWithDefault->unsetDefault())
-  //         ->get();
+    // Custom delimiter, but default in request
+    models = await createQueryFromFilterRequest({
+      ref_id: 'h4S4MG3(+>azv4z/I<o>,>XZII/Q1On',
+    }).allowedFilters(AllowedFilter.exact('ref_id', 'name', true, '|'));
 
-  //     expect($models->count())->toEqual(5);
-  // });
+    assert.lengthOf(models, 0);
+  });
 
-  // it('should apply a filter with a multi-dimensional array value', function () {
-  //     TestModel::create(['name' => 'John Doe']);
+  test('can filter name with equal operator filter', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    await TestModelFactory.merge({ name: 'John Doe' }).create();
+    const results = await createQueryFromFilterRequest({
+      name: 'John Doe',
+    }).allowedFilters(AllowedFilter.operator('name', FilterOperator.Equal));
 
-  //     $models = createQueryFromFilterRequest(['conditions' => [[
-  //         'attribute' => 'name',
-  //         'operator' => '=',
-  //         'value' => 'John Doe',
-  //     ]]])
-  //         ->allowedFilters(AllowedFilter::callback('conditions', function ($query, $conditions) {
-  //             foreach ($conditions as $condition) {
-  //                 $query->where(
-  //                     $condition['attribute'],
-  //                     $condition['operator'],
-  //                     $condition['value']
-  //                 );
-  //             }
-  //         }))
-  //         ->get();
+    assert.lengthOf(results, 1);
+  });
 
-  //     expect($models->count())->toEqual(1);
-  // });
+  test('can filter name with not equal operator filter', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    await TestModelFactory.merge({ name: 'John Doe' }).create();
+    const results = await createQueryFromFilterRequest({
+      name: 'John Doe',
+    }).allowedFilters(AllowedFilter.operator('name', FilterOperator.NotEqual));
 
-  // it('can override the array value delimiter for single filters', function () {
-  //     TestModel::create(['name' => '>XZII/Q1On']);
-  //     TestModel::create(['name' => 'h4S4MG3(+>azv4z/I<o>']);
+    assert.lengthOf(results, 5);
+  });
 
-  //     // First use default delimiter
-  //     $models = createQueryFromFilterRequest([
-  //         'ref_id' => 'h4S4MG3(+>azv4z/I<o>,>XZII/Q1On',
-  //     ])
-  //         ->allowedFilters(AllowedFilter::exact('ref_id', 'name', true))
-  //         ->get();
-  //     expect($models->count())->toEqual(2);
+  test('can filter salary with greater than operator filter', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    await TestModelFactory.merge({ salary: 5000 }).create();
+    const results = await createQueryFromFilterRequest({
+      salary: 3000,
+    }).allowedFilters(AllowedFilter.operator('salary', FilterOperator.GreaterThan));
 
-  //     // Custom delimiter
-  //     $models = createQueryFromFilterRequest([
-  //         'ref_id' => 'h4S4MG3(+>azv4z/I<o>|>XZII/Q1On',
-  //     ])
-  //         ->allowedFilters(AllowedFilter::exact('ref_id', 'name', true, '|'))
-  //         ->get();
-  //     expect($models->count())->toEqual(2);
+    assert.lengthOf(results, 1);
+  });
 
-  //     // Custom delimiter, but default in request
-  //     $models = createQueryFromFilterRequest([
-  //         'ref_id' => 'h4S4MG3(+>azv4z/I<o>,>XZII/Q1On',
-  //     ])
-  //         ->allowedFilters(AllowedFilter::exact('ref_id', 'name', true, '|'))
-  //         ->get();
-  //     expect($models->count())->toEqual(0);
-  // });
+  test('can filter salary with less than operator filter', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    await TestModelFactory.merge({ salary: 5000 }).create();
+    const results = await createQueryFromFilterRequest({
+      salary: 7000,
+    }).allowedFilters(AllowedFilter.operator('salary', FilterOperator.LessThan));
 
-  // it('can filter name with equal operator filter', function () {
-  //     TestModel::create(['name' => 'John Doe']);
+    assert.lengthOf(results, 1);
+  });
 
-  //     $results = createQueryFromFilterRequest([
-  //         'name' => 'John Doe',
-  //     ])
-  //         ->allowedFilters(AllowedFilter::operator('name', FilterOperator::EQUAL))
-  //         ->get();
+  test('can filter salary with greater than or equal operator filter', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    await TestModelFactory.merge({ salary: 5000 }).create();
+    const results = await createQueryFromFilterRequest({
+      salary: 3000,
+    }).allowedFilters(AllowedFilter.operator('salary', FilterOperator.GreaterThanOrEqual));
 
-  //     expect($results)->toHaveCount(1);
-  // });
+    assert.lengthOf(results, 1);
+  });
 
-  // it('can filter name with not equal operator filter', function () {
-  //     TestModel::create(['name' => 'John Doe']);
+  test('can filter salary with less than or equal operator filter', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    await TestModelFactory.merge({ salary: 5000 }).create();
+    const results = await createQueryFromFilterRequest({
+      salary: 7000,
+    }).allowedFilters(AllowedFilter.operator('salary', FilterOperator.LessThanOrEqual));
 
-  //     $results = createQueryFromFilterRequest([
-  //         'name' => 'John Doe',
-  //     ])
-  //         ->allowedFilters(AllowedFilter::operator('name', FilterOperator::NOT_EQUAL))
-  //         ->get();
+    assert.lengthOf(results, 1);
+  });
 
-  //     expect($results)->toHaveCount(5);
-  // });
+  test('can filter array of names with equal operator filter', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    await TestModelFactory.merge({ name: 'John Doe' }).create();
+    await TestModelFactory.merge({ name: 'Max Doe' }).create();
+    const query = createQueryFromFilterRequest({
+      name: 'John Doe,Max Doe',
+    }).allowedFilters(AllowedFilter.operator('name', FilterOperator.Equal, 'or'));
+    const results = await query.exec();
 
-  // it('can filter salary with greater than operator filter', function () {
-  //     TestModel::create(['salary' => 5000]);
+    assert.lengthOf(results, 2);
+  });
 
-  //     $results = createQueryFromFilterRequest([
-  //         'salary' => 3000,
-  //     ])
-  //         ->allowedFilters(AllowedFilter::operator('salary', FilterOperator::GREATER_THAN))
-  //         ->get();
+  test('can filter salary with dynamic operator filter', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    await TestModelFactory.merge({ salary: 5000 }).create();
+    await TestModelFactory.merge({ salary: 2000 }).create();
+    const results = await createQueryFromFilterRequest({
+      salary: '>2000',
+    })
+      .allowedFilters(AllowedFilter.operator('salary', FilterOperator.Dynamic))
+      .exec();
 
-  //     expect($results)->toHaveCount(1);
-  // });
+    assert.lengthOf(results, 1);
+  });
 
-  // it('can filter salary with less than operator filter', function () {
-  //     TestModel::create(['salary' => 5000]);
+  test('can filter salary with dynamic array operator filter', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    await TestModelFactory.merge({ salary: 1000 }).create();
+    await TestModelFactory.merge({ salary: 2000 }).create();
+    await TestModelFactory.merge({ salary: 3000 }).create();
+    await TestModelFactory.merge({ salary: 4000 }).create();
+    const results = await createQueryFromFilterRequest({
+      salary: '>1000,<4000',
+    })
+      .allowedFilters(AllowedFilter.operator('salary', FilterOperator.Dynamic))
+      .exec();
 
-  //     $results = createQueryFromFilterRequest([
-  //         'salary' => 7000,
-  //     ])
-  //         ->allowedFilters(AllowedFilter::operator('salary', FilterOperator::LESS_THAN))
-  //         ->get();
-
-  //     expect($results)->toHaveCount(1);
-  // });
-
-  // it('can filter salary with greater than or equal operator filter', function () {
-  //     TestModel::create(['salary' => 5000]);
-
-  //     $results = createQueryFromFilterRequest([
-  //         'salary' => 3000,
-  //     ])
-  //         ->allowedFilters(AllowedFilter::operator('salary', FilterOperator::GREATER_THAN_OR_EQUAL))
-  //         ->get();
-
-  //     expect($results)->toHaveCount(1);
-  // });
-
-  // it('can filter salary with less than or equal operator filter', function () {
-  //     TestModel::create(['salary' => 5000]);
-
-  //     $results = createQueryFromFilterRequest([
-  //         'salary' => 7000,
-  //     ])
-  //         ->allowedFilters(AllowedFilter::operator('salary', FilterOperator::LESS_THAN_OR_EQUAL))
-  //         ->get();
-
-  //     expect($results)->toHaveCount(1);
-  // });
-
-  // it('can filter array of names with equal operator filter', function () {
-  //     TestModel::create(['name' => 'John Doe']);
-  //     TestModel::create(['name' => 'Max Doe']);
-
-  //     $results = createQueryFromFilterRequest([
-  //         'name' => 'John Doe,Max Doe',
-  //     ])
-  //         ->allowedFilters(AllowedFilter::operator('name', FilterOperator::EQUAL, 'or'))
-  //         ->get();
-
-  //     expect($results)->toHaveCount(2);
-  // });
-
-  // it('can filter salary with dynamic operator filter', function () {
-  //     TestModel::create(['salary' => 5000]);
-  //     TestModel::create(['salary' => 2000]);
-
-  //     $results = createQueryFromFilterRequest([
-  //         'salary' => '>2000',
-  //     ])
-  //         ->allowedFilters(AllowedFilter::operator('salary', FilterOperator::DYNAMIC))
-  //         ->get();
-
-  //     expect($results)->toHaveCount(1);
-  // });
-
-  // it('can filter salary with dynamic array operator filter', function () {
-  //     TestModel::create(['salary' => 1000]);
-  //     TestModel::create(['salary' => 2000]);
-  //     TestModel::create(['salary' => 3000]);
-  //     TestModel::create(['salary' => 4000]);
-
-  //     $results = createQueryFromFilterRequest([
-  //         'salary' => '>1000,<4000',
-  //     ])
-  //         ->allowedFilters(AllowedFilter::operator('salary', FilterOperator::DYNAMIC))
-  //         ->get();
-
-  //     expect($results)->toHaveCount(2);
-  // });
+    assert.lengthOf(results, 2);
+  });
 });

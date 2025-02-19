@@ -9,6 +9,7 @@ export class FiltersOperator<Model extends LucidModel> extends FiltersExact<Mode
   public constructor(
     protected $addRelationConstraint: boolean,
     protected $filterOperator: FilterOperator,
+    protected $boolean: 'and' | 'or',
   ) {
     super($addRelationConstraint);
   }
@@ -43,7 +44,13 @@ export class FiltersOperator<Model extends LucidModel> extends FiltersExact<Mode
       value = this.removeDynamicFilterOperatorFromValue(value.toString(), filterOperator);
     }
 
-    void query.where(this.qualifyColumn(query, property), filterOperator, value);
+    if (this.$boolean === 'and') {
+      void query.where(this.qualifyColumn(query, property), filterOperator, value);
+
+      return;
+    }
+
+    void query.orWhere(this.qualifyColumn(query, property), filterOperator, value);
   }
 
   protected getDynamicFilterOperator(value: string): FilterOperator {
