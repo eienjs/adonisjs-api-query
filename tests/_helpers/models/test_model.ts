@@ -1,5 +1,8 @@
-import { BaseModel, column } from '@adonisjs/lucid/orm';
-import { type DateTime } from 'luxon';
+import { BaseModel, column, scope } from '@adonisjs/lucid/orm';
+import { type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import { DateTime } from 'luxon';
+
+type Builder = ModelQueryBuilderContract<typeof TestModel>;
 
 export default class TestModel extends BaseModel {
   @column({ isPrimary: true })
@@ -22,4 +25,28 @@ export default class TestModel extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare public updatedAt: DateTime | null;
+
+  public static readonly namedScope = scope((scopeQuery, name: string) => {
+    const query = scopeQuery as Builder;
+
+    void query.where('name', name);
+  });
+
+  public static readonly userScope = scope((scopeQuery, user: TestModel) => {
+    const query = scopeQuery as Builder;
+
+    void query.where('id', user.id);
+  });
+
+  public static readonly userInfoScope = scope((scopeQuery, user: TestModel, name: string) => {
+    const query = scopeQuery as Builder;
+
+    void query.where('id', user.id).where('name', name);
+  });
+
+  public static readonly createdBetweenScope = scope((scopeQuery, from: string, to: string) => {
+    const query = scopeQuery as Builder;
+
+    void query.whereBetween('createdAt', [DateTime.fromISO(from).toJSDate(), DateTime.fromISO(to).toJSDate()]);
+  });
 }
