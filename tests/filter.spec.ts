@@ -1,7 +1,6 @@
 import { RequestFactory } from '@adonisjs/core/factories/http';
 import { setApp } from '@adonisjs/core/services/app';
 import { type ApplicationService } from '@adonisjs/core/types';
-import { type LucidModel, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
 import { test } from '@japa/runner';
 import collect from 'collect.js';
 import { AllowedFilter } from '../src/allowed_filter.js';
@@ -12,23 +11,7 @@ import { FiltersExact } from '../src/filters/filters_exact.js';
 import CustomFilter from './_helpers/classes/custom_filter.js';
 import { TestModelFactory } from './_helpers/factories/test_model.js';
 import TestModel from './_helpers/models/test_model.js';
-import { createDbModels, setupApp } from './_helpers/test_utils.js';
-
-const createQueryFromFilterRequest = <Model extends LucidModel>(
-  filters: unknown,
-  model?: Model,
-): typeof model extends LucidModel ? ModelQueryBuilderContract<Model> : ModelQueryBuilderContract<typeof TestModel> => {
-  const TargetModel = model ?? TestModel;
-
-  const request = new RequestFactory().create();
-  request.updateQs({
-    filter: filters,
-  });
-
-  return TargetModel.query().setRequest(request) as typeof model extends LucidModel
-    ? ModelQueryBuilderContract<Model>
-    : ModelQueryBuilderContract<typeof TestModel>;
-};
+import { createDbModels, createQueryFromFilterRequest, setupApp } from './_helpers/test_utils.js';
 
 test.group('filter', (group) => {
   let app: ApplicationService;
