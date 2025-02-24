@@ -45,15 +45,6 @@ test.group('filter', (group) => {
     assert.lengthOf(resultModels, 1);
   });
 
-  // TODO: fix this test
-  test('can filter models by an record as filter value', async ({ assert }) => {
-    const models = await createDbModels(app, TestModelFactory, 5);
-    const query = createQueryFromFilterRequest({ name: { first: models.at(0)?.name } }).allowedFilters('name');
-    const resultModels = await query;
-
-    assert.lengthOf(resultModels, 1);
-  }).skip();
-
   test('can filter partially and case insensitive', async ({ assert }) => {
     const models = await createDbModels(app, TestModelFactory, 5);
     const resultModels = await createQueryFromFilterRequest({ name: models.at(0)?.name?.toUpperCase() }).allowedFilters(

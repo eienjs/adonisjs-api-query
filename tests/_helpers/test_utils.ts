@@ -118,10 +118,10 @@ export const createDbModels = async <Model extends LucidModel, FactoryModel exte
   return models;
 };
 
-export const createQueryFromFilterRequest = <Model extends LucidModel>(
+export const createQueryFromFilterRequest = <Model extends LucidModel = typeof TestModel>(
   filters: unknown,
   model?: Model,
-): typeof model extends LucidModel ? ModelQueryBuilderContract<Model> : ModelQueryBuilderContract<typeof TestModel> => {
+): ModelQueryBuilderContract<Model> => {
   const TargetModel = model ?? TestModel;
 
   const request = new RequestFactory().create();
@@ -129,7 +129,5 @@ export const createQueryFromFilterRequest = <Model extends LucidModel>(
     filter: filters,
   });
 
-  return TargetModel.query().setRequest(request) as typeof model extends LucidModel
-    ? ModelQueryBuilderContract<Model>
-    : ModelQueryBuilderContract<typeof TestModel>;
+  return TargetModel.query().setRequest(request) as ModelQueryBuilderContract<Model>;
 };

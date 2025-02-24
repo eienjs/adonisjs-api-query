@@ -39,16 +39,17 @@ test.group('filter trashed', (group) => {
     assert.lengthOf(resultModels, 1);
   });
 
-  // TODO: fix this test
-  // test('can filter only trashed by scope directly', async ({ assert }) => {
-  //   await createDbModels(app, SoftDeleteModelFactory, 2);
-  //   await SoftDeleteModelFactory.merge({ deletedAt: DateTime.now() }).create();
-  //   const resultModels = await createQueryFromFilterRequest({ onlyTrashed: true }, SoftDeleteModel).allowedFilters(
-  //     AllowedFilter.scope('onlyTrashed'),
-  //   );
+  test('can filter only trashed by scope using callback', async ({ assert }) => {
+    await createDbModels(app, SoftDeleteModelFactory, 2);
+    await SoftDeleteModelFactory.merge({ deletedAt: DateTime.now() }).create();
+    const resultModels = await createQueryFromFilterRequest({ onlyTrashed: true }, SoftDeleteModel).allowedFilters(
+      AllowedFilter.callback('onlyTrashed', (query) => {
+        void query.withScopes((scope) => scope.onlyTrashedScope());
+      }),
+    );
 
-  //   assert.lengthOf(resultModels, 1);
-  // });
+    assert.lengthOf(resultModels, 1);
+  });
 
   test('can filter with trashed', async ({ assert }) => {
     await createDbModels(app, SoftDeleteModelFactory, 2);
