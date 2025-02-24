@@ -47,6 +47,6 @@ export default class TestModel extends BaseModel {
   public static readonly createdBetweenScope = scope((scopeQuery, from: string, to: string) => {
     const query = scopeQuery as Builder;
 
-    void query.whereBetween('createdAt', [DateTime.fromISO(from).toJSDate(), DateTime.fromISO(to).toJSDate()]);
+    void query.whereBetween('createdAt', [DateTime.fromISO(from).toSQL()!, DateTime.fromISO(to).toSQL()!]);
   });
 }

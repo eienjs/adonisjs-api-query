@@ -3,6 +3,7 @@ import { setApp } from '@adonisjs/core/services/app';
 import { type ApplicationService } from '@adonisjs/core/types';
 import { test } from '@japa/runner';
 import { Collection } from 'collect.js';
+import { AllowedFilter } from '../src/allowed_filter.js';
 import { AllowedSort } from '../src/allowed_sort.js';
 import { ApiQueryBuilderRequest } from '../src/api_query_builder_request.js';
 import { SortDirection } from '../src/enums/sort_direction.js';
@@ -291,33 +292,40 @@ test.group('sort', (group) => {
     assert.equal(query.toQuery(), 'select * from `test_models` order by `created_at` desc');
   });
 
-  // TODO: check if this is possible with filters
-  // test('can sort and use scoped filters at the same time', async ({ assert }) => {
-  //   await createDbModels(app, 5);
-  //   const sortClass = new CustomSort();
-  //   const request = new RequestFactory().create();
-  //   request.updateQs({
-  //     filter: {
-  //       name: 'foo',
-  //       between: '2016-01-01,2017-01-01',
-  //     },
-  //     sort: '-custom',
-  //   });
-  //   const query = TestModel.query()
-  //     .setRequest(request)
-  //     .allowedFilters([AllowedFilter.scope('name', 'named'), AllowedFilter.scope('between', 'createdBetween')])
-  //     .allowedSorts(AllowedSort.custom('custom', sortClass));
+  test('can sort and use scoped filters at the same time', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 5);
+    const sortClass = new CustomSort();
+    const request = new RequestFactory().create();
+    request.updateQs({
+      filter: {
+        name: 'foo',
+        between: '2016-01-01,2017-01-01',
+      },
+      sort: '-custom',
+    });
+    const query = TestModel.query()
+      .setRequest(request)
+      .allowedFilters(
+        AllowedFilter.callback('name', (subQuery, value) => {
+          void subQuery.withScopes((scope) => scope.namedScope(value as string));
+        }),
+        AllowedFilter.callback('between', (subQuery, value) => {
+          const requestValue = value as [string, string];
+          void subQuery.withScopes((scope) => scope.createdBetweenScope(requestValue[0], requestValue[1]));
+        }),
+      )
+      .allowedSorts(AllowedSort.custom('custom', sortClass));
 
-  //   const result = await query.exec();
-  //   const originalCollection = new Collection(result);
-  //   const sortedCollection = originalCollection.sortBy('name');
+    const result = await query.exec();
+    const originalCollection = new Collection(result);
+    const sortedCollection = originalCollection.sortBy('name');
 
-  //   assert.equal(
-  //     query.toQuery(),
-  //     'select * from `test_models` where `name` = ? and `created_at` between ? and ? order by `name` desc',
-  //   );
-  //   assert.deepEqual(sortedCollection.pluck('id').all(), originalCollection.pluck('id').all());
-  // });
+    assert.equal(
+      query.toQuery(),
+      "select * from `test_models` where `name` = 'foo' and `created_at` between '2016-01-01 00:00:00.000 -06:00' and '2017-01-01 00:00:00.000 -06:00' order by `name` desc",
+    );
+    assert.deepEqual(sortedCollection.pluck('id').all(), originalCollection.pluck('id').all());
+  });
 
   test('ignores non existing sorts before adding them as an alias', ({ assert }) => {
     const query = createQueryFromSortRequest('-alias');

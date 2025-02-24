@@ -3,10 +3,12 @@ import { setApp } from '@adonisjs/core/services/app';
 import { type ApplicationService } from '@adonisjs/core/types';
 import { test } from '@japa/runner';
 import collect from 'collect.js';
+import { DateTime } from 'luxon';
 import { AllowedFilter } from '../src/allowed_filter.js';
 import { ApiQueryBuilderRequest } from '../src/api_query_builder_request.js';
 import { FilterOperator } from '../src/enums/filter_operator.js';
 import { InvalidFilterQuery } from '../src/exceptions/invalid_filter_query.js';
+import { InvalidFilterValue } from '../src/exceptions/invalid_filter_value.js';
 import { FiltersExact } from '../src/filters/filters_exact.js';
 import CustomFilter from './_helpers/classes/custom_filter.js';
 import { TestModelFactory } from './_helpers/factories/test_model.js';
@@ -277,15 +279,23 @@ test.group('filter', (group) => {
   //     ['testModel.relatedModels', \Illuminate\Database\Eloquent\RelationNotFoundException::class], // existing 'testModel' belongsTo relation and existing 'relatedModels' relation but not a belongsTo relation
   // ]);
 
-  // it('can filter results by scope', function () {
-  //     $testModel = TestModel::create(['name' => 'John Testing Doe']);
+  test('can filter results by scope using callback', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 3);
+    await TestModelFactory.merge({ name: 'John Testing Doe' }).create();
+    const modelsResult = await createQueryFromFilterRequest({
+      named: 'John Testing Doe',
+    }).allowedFilters(
+      AllowedFilter.callback('named', (query, value) => {
+        if (typeof value !== 'string') {
+          throw InvalidFilterValue.make(value);
+        }
 
-  //     $modelsResult = createQueryFromFilterRequest(['named' => 'John Testing Doe'])
-  //         ->allowedFilters(AllowedFilter::scope('named'))
-  //         ->get();
+        void query.withScopes((scope) => scope.namedScope(value));
+      }),
+    );
 
-  //     expect($modelsResult)->toHaveCount(1);
-  // });
+    assert.lengthOf(modelsResult, 1);
+  });
 
   // it('can filter results by nested relation scope', function () {
   //     $testModel = TestModel::create(['name' => 'John Testing Doe']);
@@ -299,49 +309,86 @@ test.group('filter', (group) => {
   //     expect($modelsResult)->toHaveCount(1);
   // });
 
-  // it('can filter results by type hinted scope', function () {
-  //     TestModel::create(['name' => 'John Testing Doe']);
+  test('can filter results by type hinted scope using callback', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 3);
+    await TestModelFactory.merge({ name: 'John Testing Doe' }).create();
+    const modelsResult = await createQueryFromFilterRequest({
+      user: 1,
+    }).allowedFilters(
+      AllowedFilter.callback('user', (query, value) => {
+        if (typeof value !== 'number') {
+          throw InvalidFilterValue.make(value);
+        }
 
-  //     $modelsResult = createQueryFromFilterRequest(['user' => 1])
-  //         ->allowedFilters(AllowedFilter::scope('user'))
-  //         ->get();
+        const user = new TestModel();
+        user.id = value;
 
-  //     expect($modelsResult)->toHaveCount(1);
-  // });
+        void query.withScopes((scope) => scope.userScope(user));
+      }),
+    );
 
-  // it('can filter results by regular and type hinted scope', function () {
-  //     TestModel::create(['id' => 1000, 'name' => 'John Testing Doe']);
+    assert.lengthOf(modelsResult, 1);
+  });
 
-  //     $modelsResult = createQueryFromFilterRequest(['user_info' => ['id' => '1000', 'name' => 'John Testing Doe']])
-  //         ->allowedFilters(AllowedFilter::scope('user_info'))
-  //         ->get();
+  test('can filter results by regular and type hinted scope using callback', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 3);
+    await TestModelFactory.merge({ id: 1000, name: 'John Testing Doe' }).create();
+    const modelsResult = await createQueryFromFilterRequest({
+      userInfo: {
+        id: '1000',
+        name: 'John Testing Doe',
+      },
+    }).allowedFilters(
+      AllowedFilter.callback('userInfo', (query, value) => {
+        if (typeof value !== 'object') {
+          throw InvalidFilterValue.make(value);
+        }
 
-  //     expect($modelsResult)->toHaveCount(1);
-  // });
+        const userInfo = value as { id: number; name: string };
 
-  // it('can filter results by scope with multiple parameters', function () {
-  //     Carbon::setTestNow(Carbon::parse('2016-05-05'));
+        const user = new TestModel();
+        user.id = userInfo.id;
 
-  //     $testModel = TestModel::create(['name' => 'John Testing Doe']);
+        void query.withScopes((scope) => scope.userInfoScope(user, userInfo.name));
+      }),
+    );
 
-  //     $modelsResult = createQueryFromFilterRequest(['created_between' => '2016-01-01,2017-01-01'])
-  //         ->allowedFilters(AllowedFilter::scope('created_between'))
-  //         ->get();
+    assert.lengthOf(modelsResult, 1);
+  });
 
-  //     expect($modelsResult)->toHaveCount(1);
-  // });
+  test('can filter results by scope with multiple parameters using callback', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 3);
+    await TestModelFactory.merge({ createdAt: DateTime.fromISO('2016-05-05') }).create();
+    const modelsResult = await createQueryFromFilterRequest({
+      createdBetween: '2016-01-01,2017-01-01',
+    }).allowedFilters(
+      AllowedFilter.callback('createdBetween', (query, value) => {
+        const requestValue = value as [string, string];
 
-  // it('can filter results by scope with multiple parameters in an associative array', function () {
-  //     Carbon::setTestNow(Carbon::parse('2016-05-05'));
+        void query.withScopes((scope) => scope.createdBetweenScope(requestValue[0], requestValue[1]));
+      }),
+    );
 
-  //     $testModel = TestModel::create(['name' => 'John Testing Doe']);
+    assert.lengthOf(modelsResult, 1);
+  });
 
-  //     $modelsResult = createQueryFromFilterRequest(['created_between' => ['start' => '2016-01-01', 'end' => '2017-01-01']])
-  //         ->allowedFilters(AllowedFilter::scope('created_between'))
-  //         ->get();
+  test('can filter results by scope with multiple parameters using callback', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 1);
+    await TestModelFactory.merge({ createdAt: DateTime.fromISO('2016-05-05') }).create();
+    const modelsResult = await createQueryFromFilterRequest({
+      createdBetween: {
+        start: '2016-01-01',
+        end: '2017-01-01',
+      },
+    }).allowedFilters(
+      AllowedFilter.callback('createdBetween', (query, value) => {
+        const requestValue = value as { start: string; end: string };
+        void query.withScopes((scope) => scope.createdBetweenScope(requestValue.start, requestValue.end));
+      }),
+    );
 
-  //     expect($modelsResult)->toHaveCount(1);
-  // });
+    assert.lengthOf(modelsResult, 1);
+  });
 
   test('can filter results by a custom filter class', async ({ assert }) => {
     const models = await createDbModels(app, TestModelFactory, 5);
