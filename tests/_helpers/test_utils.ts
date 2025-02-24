@@ -87,6 +87,7 @@ export const setupDatabase = async (db: Database) => {
   test.cleanup(async () => {
     await db.connection().schema.dropTableIfExists('test_models');
     await db.connection().schema.dropTableIfExists('soft_delete_models');
+    await db.connection().schema.dropTableIfExists('related_models');
   });
 
   await db.connection().schema.createTable('test_models', (table) => {
@@ -102,6 +103,14 @@ export const setupDatabase = async (db: Database) => {
     table.increments('id');
     table.string('name');
     table.timestamp('deleted_at').nullable();
+    table.timestamps();
+  });
+
+  await db.connection().schema.createTable('related_models', (table) => {
+    table.increments('id');
+    table.integer('test_model_id');
+    table.string('name');
+    table.string('full_name').nullable();
     table.timestamps();
   });
 };

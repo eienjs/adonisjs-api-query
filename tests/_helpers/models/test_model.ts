@@ -1,6 +1,8 @@
-import { BaseModel, column, scope } from '@adonisjs/lucid/orm';
+import { BaseModel, belongsTo, column, hasMany, scope } from '@adonisjs/lucid/orm';
 import { type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import { type BelongsTo, type HasMany } from '@adonisjs/lucid/types/relations';
 import { DateTime } from 'luxon';
+import RelatedModel from './related_model.js';
 
 type Builder = ModelQueryBuilderContract<typeof TestModel>;
 
@@ -25,6 +27,12 @@ export default class TestModel extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare public updatedAt: DateTime | null;
+
+  @hasMany(() => RelatedModel)
+  declare public relatedModels: HasMany<typeof RelatedModel>;
+
+  @belongsTo(() => RelatedModel)
+  declare public relatedModel: BelongsTo<typeof RelatedModel>;
 
   public static readonly namedScope = scope((scopeQuery, name: string) => {
     const query = scopeQuery as Builder;
