@@ -94,10 +94,10 @@ export interface Filter<Model extends LucidModel> {
   ): void;
 }
 
-export interface Include<Model extends LucidModel> {
+export interface Include<ParentModel extends LucidModel> {
   handle(
-    query: ModelQueryBuilderContract<Model, InstanceType<Model>>,
-    include: ExtractModelRelations<InstanceType<Model>>,
+    query: ModelQueryBuilderContract<ParentModel, InstanceType<ParentModel>>,
+    include: ExtractModelRelations<InstanceType<ParentModel>>,
   ): void;
 }
 
