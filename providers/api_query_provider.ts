@@ -3,6 +3,7 @@ import { type ApplicationService } from '@adonisjs/core/types';
 import { ModelQueryBuilder } from '@adonisjs/lucid/orm';
 import { type LucidModel } from '@adonisjs/lucid/types/model';
 import { type AllowedFilter } from '../src/allowed_filter.js';
+import { type AllowedInclude } from '../src/allowed_include.js';
 import { type AllowedSort } from '../src/allowed_sort.js';
 import { type ApiQueryBuilderRequest } from '../src/api_query_builder_request.js';
 import { type ExtractKeys, type ResolvedApiQueryConfig, type SortUnionKeyParams } from '../src/types.js';
@@ -14,9 +15,14 @@ export default class ApiQueryProvider {
     const { extendModelQueryBuilderWithRequest } = await import('../src/bindings/api_query_request.js');
     const { extendModelQueryBuilderWithSortsQuery } = await import('../src/bindings/sorts_query.js');
     const { extendModelQueryBuilderWithFiltersQuery } = await import('../src/bindings/filters_query.js');
+    const { extendModelQueryBuilderWithIncludesQuery } = await import('../src/bindings/includes_query.js');
     extendModelQueryBuilderWithRequest(ModelQueryBuilder);
     extendModelQueryBuilderWithSortsQuery(ModelQueryBuilder, this.app.config.get<ResolvedApiQueryConfig>('apiquery'));
     extendModelQueryBuilderWithFiltersQuery(ModelQueryBuilder, this.app.config.get<ResolvedApiQueryConfig>('apiquery'));
+    extendModelQueryBuilderWithIncludesQuery(
+      ModelQueryBuilder,
+      this.app.config.get<ResolvedApiQueryConfig>('apiquery'),
+    );
   }
 }
 
@@ -32,6 +38,9 @@ declare module '@adonisjs/lucid/orm' {
 
     allowedFilters(...filters: (AllowedFilter<LucidModel> | string)[]): this;
     allowedFilters(filters: (AllowedFilter<LucidModel> | string)[]): this;
+
+    allowedIncludes(...includes: (AllowedInclude<LucidModel> | string)[]): this;
+    allowedIncludes(includes: (AllowedInclude<LucidModel> | string)[]): this;
   }
 }
 
@@ -48,5 +57,8 @@ declare module '@adonisjs/lucid/types/model' {
 
     allowedFilters(...filters: (AllowedFilter<Model> | ExtractKeys<ModelAttributes<InstanceType<Model>>>)[]): this;
     allowedFilters(filters: (AllowedFilter<Model> | ExtractKeys<ModelAttributes<InstanceType<Model>>>)[]): this;
+
+    allowedIncludes(...includes: (AllowedInclude<Model> | string)[]): this;
+    allowedIncludes(includes: (AllowedInclude<Model> | string)[]): this;
   }
 }

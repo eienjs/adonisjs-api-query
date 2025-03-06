@@ -13,10 +13,7 @@ export class IncludedCallback<ParentModel extends LucidModel, RelatedModel exten
     ) => void,
   ) {}
 
-  public handle(
-    query: ModelQueryBuilderContract<ParentModel, InstanceType<ParentModel>>,
-    include: ExtractModelRelations<InstanceType<ParentModel>>,
-  ): void {
-    void query.preload(include, this.callback);
+  public handle(query: ModelQueryBuilderContract<ParentModel, InstanceType<ParentModel>>, include: string): void {
+    void query.preload(include as ExtractModelRelations<InstanceType<ParentModel>>, this.callback);
   }
 }

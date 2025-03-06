@@ -85,9 +85,9 @@ export class ApiQueryBuilderRequest {
     this._request = request;
   }
 
-  public includes(): Collection<unknown> {
+  public includes(): Collection<string> {
     const includeParameterName = app.config.get<string>('apiquery.parameters.include', 'include');
-    let includeParts = this.getRequestData(includeParameterName, {});
+    let includeParts = this.getRequestData<string[] | string>(includeParameterName, []);
 
     if (typeof includeParts === 'string') {
       includeParts = includeParts.split(ApiQueryBuilderRequest.getIncludesArrayValueDelimiter());
