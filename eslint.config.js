@@ -7,5 +7,6 @@ export default defineConfig({
   rules: {
     'unicorn/no-array-reduce': 'off',
     'unicorn/prefer-spread': 'off',
+    'sonarjs/void-use': 'off',
   },
 });

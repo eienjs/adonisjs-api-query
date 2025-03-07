@@ -9,9 +9,28 @@ import { type FactoryBuilderQueryContract, type FactoryModelContract } from '@ad
 import { type LucidModel, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
 import { getActiveTest } from '@japa/runner';
 import { defineConfig } from '../../src/define_config.js';
+import { type ApiQueryConfig } from '../../src/types.js';
 import TestModel from './models/test_model.js';
 
 const BASE_URL = new URL('tmp/', import.meta.url);
+
+export const defaultConfigApiQuery: ApiQueryConfig = {
+  parameters: {
+    include: 'include',
+    filter: 'filter',
+    sort: 'sort',
+    fields: 'fields',
+    append: 'append',
+  },
+  countSuffix: 'Count',
+  existsSuffix: 'Exists',
+  disableInvalidFilterQueryException: false,
+  disableInvalidSortQueryException: false,
+  disableInvalidIncludesQueryException: false,
+  convertRelationNamesToSnakeCasePlural: false,
+  convertRelationTableNameStrategy: false,
+  convertFieldNamesToSnakeCase: false,
+};
 
 export const setupApp = async function (
   env?: AppEnvironments,
@@ -34,25 +53,7 @@ export const setupApp = async function (
               },
             },
           }),
-        apiquery:
-          config.apiquery ??
-          defineConfig({
-            parameters: {
-              include: 'include',
-              filter: 'filter',
-              sort: 'sort',
-              fields: 'fields',
-              append: 'append',
-            },
-            countSuffix: 'Count',
-            existsSuffix: 'Exists',
-            disableInvalidFilterQueryException: false,
-            disableInvalidSortQueryException: false,
-            disableInvalidIncludesQueryException: false,
-            convertRelationNamesToSnakeCasePlural: false,
-            convertRelationTableNameStrategy: false,
-            convertFieldNamesToSnakeCase: false,
-          }),
+        apiquery: config.apiquery ?? defineConfig(defaultConfigApiQuery),
       },
       rcFileContents: {
         providers: [
@@ -73,9 +74,10 @@ export const setupApp = async function (
     });
 
   const app = ignitor.createApp(env || 'web');
-  await app.init().then(() => app.boot());
+  await app.init();
+  await app.boot();
 
-  return app as unknown as ApplicationService;
+  return app;
 };
 
 export const setupDatabase = async (db: Database) => {

@@ -62,7 +62,6 @@ export class IncludedRelationship<ParentModel extends LucidModel> implements Inc
       return;
     }
 
-    // eslint-disable-next-line sonarjs/void-use
     void subQuery.preload(relation as ExtractModelRelations<InstanceType<SubRelatedModel>>, (nestedQuery) => {
       const fullRelationName = parent === '' ? relation : `${parent}.${relation}`;
       if (this.getRequestedFieldsForRelatedTable !== undefined) {

@@ -1,12 +1,20 @@
+import { configProvider } from '@adonisjs/core';
+import { RuntimeException } from '@adonisjs/core/exceptions';
 import { type Request } from '@adonisjs/core/http';
 import { type ApplicationService } from '@adonisjs/core/types';
 import { ModelQueryBuilder } from '@adonisjs/lucid/orm';
 import { type LucidModel } from '@adonisjs/lucid/types/model';
+import { type Collection } from 'collect.js';
 import { type AllowedFilter } from '../src/allowed_filter.js';
 import { type AllowedInclude } from '../src/allowed_include.js';
 import { type AllowedSort } from '../src/allowed_sort.js';
 import { type ApiQueryBuilderRequest } from '../src/api_query_builder_request.js';
-import { type ExtractKeys, type ResolvedApiQueryConfig, type SortUnionKeyParams } from '../src/types.js';
+import {
+  type ApiQueryConfig,
+  type ExtractKeys,
+  type ResolvedApiQueryConfig,
+  type SortUnionKeyParams,
+} from '../src/types.js';
 
 export default class ApiQueryProvider {
   public constructor(protected app: ApplicationService) {}
@@ -16,13 +24,19 @@ export default class ApiQueryProvider {
     const { extendModelQueryBuilderWithSortsQuery } = await import('../src/bindings/sorts_query.js');
     const { extendModelQueryBuilderWithFiltersQuery } = await import('../src/bindings/filters_query.js');
     const { extendModelQueryBuilderWithIncludesQuery } = await import('../src/bindings/includes_query.js');
+    const apiQueryConfigProvider = this.app.config.get<ApiQueryConfig>('apiquery');
+    const config = await configProvider.resolve<ResolvedApiQueryConfig>(this.app, apiQueryConfigProvider);
+
+    if (!config) {
+      throw new RuntimeException(
+        'Invalid "config/apiquery.ts" file. Make sure you are using the "defineConfig" method',
+      );
+    }
+
     extendModelQueryBuilderWithRequest(ModelQueryBuilder);
-    extendModelQueryBuilderWithSortsQuery(ModelQueryBuilder, this.app.config.get<ResolvedApiQueryConfig>('apiquery'));
-    extendModelQueryBuilderWithFiltersQuery(ModelQueryBuilder, this.app.config.get<ResolvedApiQueryConfig>('apiquery'));
-    extendModelQueryBuilderWithIncludesQuery(
-      ModelQueryBuilder,
-      this.app.config.get<ResolvedApiQueryConfig>('apiquery'),
-    );
+    extendModelQueryBuilderWithSortsQuery(ModelQueryBuilder, config);
+    extendModelQueryBuilderWithFiltersQuery(ModelQueryBuilder, config);
+    extendModelQueryBuilderWithIncludesQuery(ModelQueryBuilder, config);
   }
 }
 
@@ -39,8 +53,8 @@ declare module '@adonisjs/lucid/orm' {
     allowedFilters(...filters: (AllowedFilter<LucidModel> | string)[]): this;
     allowedFilters(filters: (AllowedFilter<LucidModel> | string)[]): this;
 
-    allowedIncludes(...includes: (AllowedInclude<LucidModel> | string)[]): this;
-    allowedIncludes(includes: (AllowedInclude<LucidModel> | string)[]): this;
+    allowedIncludes(...includes: (Collection<AllowedInclude<LucidModel>> | string)[]): this;
+    allowedIncludes(includes: (Collection<AllowedInclude<LucidModel>> | string)[]): this;
   }
 }
 
@@ -58,7 +72,7 @@ declare module '@adonisjs/lucid/types/model' {
     allowedFilters(...filters: (AllowedFilter<Model> | ExtractKeys<ModelAttributes<InstanceType<Model>>>)[]): this;
     allowedFilters(filters: (AllowedFilter<Model> | ExtractKeys<ModelAttributes<InstanceType<Model>>>)[]): this;
 
-    allowedIncludes(...includes: (AllowedInclude<Model> | string)[]): this;
-    allowedIncludes(includes: (AllowedInclude<Model> | string)[]): this;
+    allowedIncludes(...includes: (Collection<AllowedInclude<Model>> | string)[]): this;
+    allowedIncludes(includes: (Collection<AllowedInclude<Model>> | string)[]): this;
   }
 }

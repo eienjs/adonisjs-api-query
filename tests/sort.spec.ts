@@ -6,13 +6,14 @@ import { Collection } from 'collect.js';
 import { AllowedFilter } from '../src/allowed_filter.js';
 import { AllowedSort } from '../src/allowed_sort.js';
 import { ApiQueryBuilderRequest } from '../src/api_query_builder_request.js';
+import { defineConfig } from '../src/define_config.js';
 import { SortDirection } from '../src/enums/sort_direction.js';
 import { InvalidSortQuery } from '../src/exceptions/invalid_sort_query.js';
 import { SortsField } from '../src/sorts/sorts_field.js';
 import CustomSort from './_helpers/classes/custom_sort.js';
 import { TestModelFactory } from './_helpers/factories/test_model.js';
 import TestModel from './_helpers/models/test_model.js';
-import { createDbModels, setupApp, setupDatabase } from './_helpers/test_utils.js';
+import { createDbModels, defaultConfigApiQuery, setupApp, setupDatabase } from './_helpers/test_utils.js';
 
 const createQueryFromSortRequest = (sort?: string) => {
   const request = new RequestFactory().create();
@@ -132,8 +133,17 @@ test.group('sort', (group) => {
     void createQueryFromSortRequest('name').allowedSorts('id');
   }).throws(/is not allowed/);
 
-  test('does not throw invalid sort query exception when disable in config', ({ assert }) => {
-    app.config.set('apiquery.disableInvalidSortQueryException', true);
+  test('does not throw invalid sort query exception when disable in config', async ({ assert, cleanup }) => {
+    await app.terminate();
+    const customApp = await setupApp('web', {
+      apiquery: defineConfig({
+        ...defaultConfigApiQuery,
+        disableInvalidSortQueryException: true,
+      }),
+    });
+    setApp(app);
+    ApiQueryBuilderRequest.resetDelimiters();
+    cleanup(() => customApp.terminate());
     const query = createQueryFromSortRequest('name').allowedSorts('id');
 
     assert.equal(query.toQuery(), 'select * from `test_models`');

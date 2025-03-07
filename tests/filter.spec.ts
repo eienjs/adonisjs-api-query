@@ -6,6 +6,7 @@ import collect from 'collect.js';
 import { DateTime } from 'luxon';
 import { AllowedFilter } from '../src/allowed_filter.js';
 import { ApiQueryBuilderRequest } from '../src/api_query_builder_request.js';
+import { defineConfig } from '../src/define_config.js';
 import { FilterOperator } from '../src/enums/filter_operator.js';
 import { InvalidFilterQuery } from '../src/exceptions/invalid_filter_query.js';
 import { InvalidFilterValue } from '../src/exceptions/invalid_filter_value.js';
@@ -13,7 +14,12 @@ import { FiltersExact } from '../src/filters/filters_exact.js';
 import CustomFilter from './_helpers/classes/custom_filter.js';
 import { TestModelFactory } from './_helpers/factories/test_model.js';
 import TestModel from './_helpers/models/test_model.js';
-import { createDbModels, createQueryFromFilterRequest, setupApp } from './_helpers/test_utils.js';
+import {
+  createDbModels,
+  createQueryFromFilterRequest,
+  defaultConfigApiQuery,
+  setupApp,
+} from './_helpers/test_utils.js';
 
 test.group('filter', (group) => {
   let app: ApplicationService;
@@ -446,8 +452,18 @@ test.group('filter', (group) => {
     }).allowedFilters('id');
   }).throws(/ are not allowed. Allowed filter\(s\) are/);
 
-  test('does not throw invalid filter exception when disable in config', ({ assert }) => {
-    app.config.set('apiquery.disableInvalidFilterQueryException', true);
+  test('does not throw invalid filter exception when disable in config', async ({ assert, cleanup }) => {
+    await app.terminate();
+    const customApp = await setupApp('web', {
+      apiquery: defineConfig({
+        ...defaultConfigApiQuery,
+        disableInvalidFilterQueryException: true,
+      }),
+    });
+    setApp(app);
+    ApiQueryBuilderRequest.resetDelimiters();
+    cleanup(() => customApp.terminate());
+
     const query = createQueryFromFilterRequest({
       name: 'John',
     }).allowedFilters('id');
