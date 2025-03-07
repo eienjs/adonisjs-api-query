@@ -20,12 +20,6 @@ export default class SoftDeleteModel extends compose(BaseModel, SoftDeletes) {
   @column.dateTime()
   declare public deletedAt: DateTime | null;
 
-  @column.dateTime({ autoCreate: true })
-  declare public createdAt: DateTime;
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare public updatedAt: DateTime | null;
-
   public static readonly onlyTrashedScope = scope((scopeQuery) => {
     const query = scopeQuery as Builder;
 

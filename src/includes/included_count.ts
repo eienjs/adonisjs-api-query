@@ -10,8 +10,6 @@ export class IncludedCount<ParentModel extends LucidModel> implements Include<Pa
       InstanceType<ParentModel>
     >;
 
-    void query.withCount(relation, (subQuery) => {
-      void subQuery.as(count);
-    });
+    void query.withCount(relation);
   }
 }

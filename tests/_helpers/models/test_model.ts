@@ -1,8 +1,10 @@
-import { BaseModel, belongsTo, column, hasMany, scope } from '@adonisjs/lucid/orm';
+import { BaseModel, belongsTo, column, hasMany, hasManyThrough, manyToMany, scope } from '@adonisjs/lucid/orm';
 import { type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
-import { type BelongsTo, type HasMany } from '@adonisjs/lucid/types/relations';
+import { type BelongsTo, type HasMany, type HasManyThrough, type ManyToMany } from '@adonisjs/lucid/types/relations';
 import { DateTime } from 'luxon';
+import NestedRelatedModel from './nested_related_model.js';
 import RelatedModel from './related_model.js';
+import RelatedThroughPivotModel from './related_through_pivot_model.js';
 
 type Builder = ModelQueryBuilderContract<typeof TestModel>;
 
@@ -33,6 +35,23 @@ export default class TestModel extends BaseModel {
 
   @belongsTo(() => RelatedModel)
   declare public relatedModel: BelongsTo<typeof RelatedModel>;
+
+  @hasManyThrough([() => NestedRelatedModel, () => RelatedModel])
+  declare public nestedRelatedModels: HasManyThrough<typeof NestedRelatedModel>;
+
+  @hasMany(() => RelatedModel)
+  declare public otherRelatedModels: HasMany<typeof RelatedModel>;
+
+  @manyToMany(() => RelatedThroughPivotModel, {
+    pivotTable: 'pivot_models',
+  })
+  declare public relatedThroughPivotModels: ManyToMany<typeof RelatedThroughPivotModel>;
+
+  @manyToMany(() => RelatedThroughPivotModel, {
+    pivotTable: 'pivot_models',
+    pivotColumns: ['location'],
+  })
+  declare public relatedThroughPivotModelsWithPivot: ManyToMany<typeof RelatedThroughPivotModel>;
 
   public static readonly namedScope = scope((scopeQuery, name: string) => {
     const query = scopeQuery as Builder;

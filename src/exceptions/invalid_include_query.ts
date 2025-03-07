@@ -2,7 +2,10 @@ import { ResponseStatus } from '@adonisjs/core/http';
 import { InvalidQuery } from './invalid_query.js';
 
 export class InvalidIncludeQuery extends InvalidQuery {
-  public constructor(unknownIncludes: string[], allowedIncludes: string[]) {
+  public constructor(
+    public readonly unknownIncludes: string[],
+    public readonly allowedIncludes: string[],
+  ) {
     const notAllowed = unknownIncludes.join(', ');
     let message = `Requested include(s) \`${notAllowed}\` are not allowed. `;
 
