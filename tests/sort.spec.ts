@@ -89,18 +89,20 @@ test.group('sort', (group) => {
     assert.deepEqual(sortedCollection.pluck('id').all(), originalCollection.pluck('id').all());
   });
 
-  // TODO: check if this is possible
-  // test('can sort a query by a related property', ({ assert }) => {
-  //   const request = new RequestFactory().create();
-  //   request.updateQs({
-  //     sort: 'relatedModels.name',
-  //     includes: 'relatedModels',
-  //   });
+  test('can sort a query by a related property', ({ assert }) => {
+    const request = new RequestFactory().create();
+    request.updateQs({
+      sort: 'relatedModels.name',
+      includes: 'relatedModels',
+    });
 
-  //   const query = TestModel.query().setRequest(request).allowedSorts('relatedModels.name');
+    const query = TestModel.query()
+      .setRequest(request)
+      .allowedIncludes('relatedModels')
+      .allowedSorts('relatedModels.name');
 
-  //   assert.equal(query.toQuery(), 'select * from `test_models` order by `related_models`.`name` asc');
-  // });
+    assert.equal(query.toQuery(), 'select * from `test_models` order by `relatedModels`.`name` asc');
+  });
 
   test('can sort by sketchy alias if its an allowed sort', async ({ assert }) => {
     await createDbModels(app, TestModelFactory, 5);

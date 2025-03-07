@@ -112,3 +112,5 @@ export type ExtractKeysWithSort<T> = T extends object
 export type SortUnionKeyParams<Model extends LucidModel> =
   | ExtractKeys<ModelAttributes<InstanceType<Model>>>
   | ExtractKeysWithSort<ModelAttributes<InstanceType<Model>>>;
+
+export type HintedString<KnownValues> = KnownValues extends string ? (string & {}) | KnownValues : never;

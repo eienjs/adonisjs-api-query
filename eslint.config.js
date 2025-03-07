@@ -8,5 +8,6 @@ export default defineConfig({
     'unicorn/no-array-reduce': 'off',
     'unicorn/prefer-spread': 'off',
     'sonarjs/void-use': 'off',
+    'sonarjs/no-useless-intersection': 'off',
   },
 });
