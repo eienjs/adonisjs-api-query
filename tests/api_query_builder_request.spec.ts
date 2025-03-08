@@ -9,8 +9,8 @@ import { setupApp } from './_helpers/test_utils.js';
 test.group('query builder request', (group) => {
   let app: ApplicationService;
 
-  group.each.setup(async () => {
-    app = await setupApp();
+  group.each.setup(async ({ context }) => {
+    app = await setupApp(context, 'web');
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
 

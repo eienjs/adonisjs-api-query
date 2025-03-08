@@ -18,7 +18,7 @@ export const extendModelQueryBuilderWithIncludesQuery = function (
       return;
     }
 
-    const includes = self.getRequest().includes();
+    const includes = self.$apiQueryBuilderRequest.includes();
     const allowedIncludeNames = self._allowedIncludes.map((allowedInclude) => {
       return allowedInclude.getName();
     });
@@ -38,7 +38,7 @@ export const extendModelQueryBuilderWithIncludesQuery = function (
   };
 
   const filterNonExistingIncludes = (self: ModelQueryBuilderWithAllowedIncludes) => {
-    const includes = self.getRequest().includes();
+    const includes = self.$apiQueryBuilderRequest.includes();
 
     if (!config.disableInvalidIncludesQueryException) {
       return includes;

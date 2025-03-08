@@ -16,10 +16,7 @@ export const extendModelQueryBuilderWithSortsQuery = function (
       return;
     }
 
-    const requestedSortNames = self
-      .getRequest()
-      .sorts()
-      .map((sort) => sort.replace(/^-+/, ''));
+    const requestedSortNames = self.$apiQueryBuilderRequest.sorts().map((sort) => sort.replace(/^-+/, ''));
     const allowedSortNames = self._allowedSorts.map((sort) => sort.getName());
     const unknownSort = requestedSortNames.diff(allowedSortNames);
 
@@ -33,16 +30,13 @@ export const extendModelQueryBuilderWithSortsQuery = function (
   };
 
   const addRequestedSortsToQuery = (self: ModelQueryBuilderWithAllowedSorts): void => {
-    self
-      .getRequest()
-      .sorts()
-      .each((property) => {
-        const descending = property.startsWith('-');
-        const key = property.replace(/^-+/, '');
-        const sort = findSort(self, key);
+    self.$apiQueryBuilderRequest.sorts().each((property) => {
+      const descending = property.startsWith('-');
+      const key = property.replace(/^-+/, '');
+      const sort = findSort(self, key);
 
-        sort?.sort(self, descending);
-      });
+      sort?.sort(self, descending);
+    });
   };
 
   builder.macro('allowedSorts', function (this: ModelQueryBuilderWithAllowedSorts, ...sorts) {
@@ -63,7 +57,7 @@ export const extendModelQueryBuilderWithSortsQuery = function (
   });
 
   builder.macro('defaultSort', function (this: ModelQueryBuilderWithAllowedSorts, ...sorts) {
-    if (this.getRequest().sorts().isNotEmpty()) {
+    if (this.$apiQueryBuilderRequest.sorts().isNotEmpty()) {
       // We've got requested sorts. No need to parse defaults.
 
       return this;

@@ -44,8 +44,8 @@ export default class ApiQueryProvider {
 
 declare module '@adonisjs/lucid/orm' {
   interface ModelQueryBuilder {
-    setRequest(request: Request): this;
-    getRequest(): ApiQueryBuilderRequest;
+    withRequest(request: Request): this;
+    $apiQueryBuilderRequest: ApiQueryBuilderRequest;
 
     allowedSorts(...sorts: (AllowedSort<LucidModel> | string)[]): this;
     allowedSorts(sorts: (AllowedSort<LucidModel> | string)[]): this;
@@ -63,8 +63,7 @@ declare module '@adonisjs/lucid/orm' {
 declare module '@adonisjs/lucid/types/model' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ModelQueryBuilderContract<Model extends LucidModel, Result = InstanceType<Model>> {
-    setRequest(request: Request): this;
-    getRequest(): ApiQueryBuilderRequest;
+    withRequest(request: Request): this;
 
     allowedSorts(...sorts: (AllowedSort<Model> | HintedString<SortUnionKeyParams<Model>>)[]): this;
     allowedSorts(sorts: (AllowedSort<Model> | HintedString<SortUnionKeyParams<Model>>)[]): this;

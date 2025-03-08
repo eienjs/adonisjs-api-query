@@ -19,7 +19,7 @@ export const extendModelQueryBuilderWithFiltersQuery = function (
       return;
     }
 
-    const filterNames = self.getRequest().filters().keys();
+    const filterNames = self.$apiQueryBuilderRequest.filters().keys();
     const allowedFilterNames = self._allowedFilters.map((allowedFilter) => {
       return allowedFilter.getName();
     });
@@ -35,13 +35,13 @@ export const extendModelQueryBuilderWithFiltersQuery = function (
     self: ModelQueryBuilderWithAllowedFilters,
     allowedFilter: AllowedFilter<LucidModel>,
   ): boolean => {
-    return self.getRequest().filters().has(allowedFilter.getName());
+    return self.$apiQueryBuilderRequest.filters().has(allowedFilter.getName());
   };
 
   const addRequestedFiltersToQuery = (query: ModelQueryBuilderWithAllowedFilters): void => {
     query._allowedFilters.each((allowedFilter) => {
       if (isFilterRequested(query, allowedFilter)) {
-        const value = query.getRequest().filters().get(allowedFilter.getName());
+        const value = query.$apiQueryBuilderRequest.filters().get(allowedFilter.getName());
         allowedFilter.filter(query, value);
 
         return;

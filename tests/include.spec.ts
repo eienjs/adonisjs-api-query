@@ -21,7 +21,7 @@ const createQueryFromIncludeRequest = (includes: string) => {
     include: includes,
   });
 
-  return TestModel.query().setRequest(request);
+  return TestModel.query().withRequest(request);
 };
 
 const createInitModels = async (app: ApplicationService, count: number) => {
@@ -39,8 +39,8 @@ const createInitModels = async (app: ApplicationService, count: number) => {
 test.group('include', (group) => {
   let app: ApplicationService;
 
-  group.each.setup(async () => {
-    app = await setupApp();
+  group.each.setup(async ({ context }) => {
+    app = await setupApp(context, 'web');
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
 
@@ -50,7 +50,7 @@ test.group('include', (group) => {
   test('does not require includes', async ({ assert }) => {
     const models = await createInitModels(app, 5);
     const result = await TestModel.query()
-      .setRequest(new RequestFactory().create())
+      .withRequest(new RequestFactory().create())
       .allowedIncludes('relatedModels')
       .exec();
 
@@ -59,7 +59,7 @@ test.group('include', (group) => {
 
   test('can handle empty includes', async ({ assert }) => {
     const models = await createInitModels(app, 5);
-    const result = await TestModel.query().setRequest(new RequestFactory().create()).allowedIncludes('').exec();
+    const result = await TestModel.query().withRequest(new RequestFactory().create()).allowedIncludes('').exec();
 
     assert.lengthOf(result, models.length);
   });
@@ -180,9 +180,10 @@ test.group('include', (group) => {
     await createQueryFromIncludeRequest('randomModel').allowedIncludes('relatedModels').first();
   }).throws(/are not allowed./);
 
-  test('doesnt throw invalid include query expection when disable in config', async ({ assert, cleanup }) => {
+  test('doesnt throw invalid include query expection when disable in config', async (ctx) => {
+    const { assert, cleanup } = ctx;
     await app.terminate();
-    const customApp = await setupApp('web', {
+    const customApp = await setupApp(ctx, 'web', {
       apiquery: defineConfig({
         ...defaultConfigApiQuery,
         disableInvalidIncludesQueryException: true,
@@ -273,7 +274,7 @@ test.group('include', (group) => {
     });
 
     const models = await TestModel.query()
-      .setRequest(request)
+      .withRequest(request)
       .allowedIncludes([
         AllowedInclude.count('relatedModelsCount'),
         AllowedInclude.relationship('relationShipAlias', 'otherRelatedModels'),

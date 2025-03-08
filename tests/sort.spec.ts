@@ -19,14 +19,14 @@ const createQueryFromSortRequest = (sort?: string) => {
   const request = new RequestFactory().create();
   request.updateQs(sort ? { sort } : {});
 
-  return TestModel.query().setRequest(request);
+  return TestModel.query().withRequest(request);
 };
 
 test.group('sort', (group) => {
   let app: ApplicationService;
 
-  group.each.setup(async () => {
-    app = await setupApp();
+  group.each.setup(async ({ context }) => {
+    app = await setupApp(context, 'web');
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
 
@@ -97,7 +97,7 @@ test.group('sort', (group) => {
     });
 
     const query = TestModel.query()
-      .setRequest(request)
+      .withRequest(request)
       .allowedIncludes('relatedModels')
       .allowedSorts('relatedModels.name');
 
@@ -123,7 +123,7 @@ test.group('sort', (group) => {
 
     const query = TestModel.query()
       .select('id', 'name')
-      .setRequest(request)
+      .withRequest(request)
       .allowedSorts('id')
       .defaultSort('id')
       .forPage(1, 15);
@@ -135,9 +135,10 @@ test.group('sort', (group) => {
     void createQueryFromSortRequest('name').allowedSorts('id');
   }).throws(/is not allowed/);
 
-  test('does not throw invalid sort query exception when disable in config', async ({ assert, cleanup }) => {
+  test('does not throw invalid sort query exception when disable in config', async (ctx) => {
+    const { assert, cleanup } = ctx;
     await app.terminate();
-    const customApp = await setupApp('web', {
+    const customApp = await setupApp(ctx, 'web', {
       apiquery: defineConfig({
         ...defaultConfigApiQuery,
         disableInvalidSortQueryException: true,
@@ -167,7 +168,7 @@ test.group('sort', (group) => {
   test('uses default sort parameter when no sort was requested', async ({ assert }) => {
     await createDbModels(app, TestModelFactory, 5);
     const request = new RequestFactory().create();
-    const query = TestModel.query().setRequest(request).defaultSort('name');
+    const query = TestModel.query().withRequest(request).defaultSort('name');
     const result = await query.exec();
     const originalCollection = new Collection(result);
     const sortedCollection = originalCollection.sortBy('name');
@@ -187,7 +188,7 @@ test.group('sort', (group) => {
     const request = new RequestFactory().create();
     const sortClass = new CustomSort();
     const query = TestModel.query()
-      .setRequest(request)
+      .withRequest(request)
       .allowedSorts(AllowedSort.custom('custom_name', sortClass))
       .defaultSort(AllowedSort.custom('custom_name', sortClass));
     const result = await query.exec();
@@ -316,7 +317,7 @@ test.group('sort', (group) => {
       sort: '-custom',
     });
     const query = TestModel.query()
-      .setRequest(request)
+      .withRequest(request)
       .allowedFilters(
         AllowedFilter.callback('name', (subQuery, value) => {
           void subQuery.withScopes((scope) => scope.namedScope(value as string));

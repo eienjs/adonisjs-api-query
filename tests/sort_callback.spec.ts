@@ -14,14 +14,14 @@ const createQueryFromSortRequest = (sort?: string) => {
   const request = new RequestFactory().create();
   request.updateQs(sort ? { sort } : {});
 
-  return TestModel.query().setRequest(request);
+  return TestModel.query().withRequest(request);
 };
 
 test.group('sort callback', (group) => {
   let app: ApplicationService;
 
-  group.each.setup(async () => {
-    app = await setupApp();
+  group.each.setup(async ({ context }) => {
+    app = await setupApp(context, 'web');
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
 

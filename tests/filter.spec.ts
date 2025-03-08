@@ -24,8 +24,8 @@ import {
 test.group('filter', (group) => {
   let app: ApplicationService;
 
-  group.each.setup(async () => {
-    app = await setupApp();
+  group.each.setup(async ({ context }) => {
+    app = await setupApp(context, 'web');
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
 
@@ -48,7 +48,7 @@ test.group('filter', (group) => {
         name: models.at(0)?.name,
       },
     });
-    const resultModels = await TestModel.query().setRequest(request).allowedFilters('name');
+    const resultModels = await TestModel.query().withRequest(request).allowedFilters('name');
 
     assert.lengthOf(resultModels, 1);
   });
@@ -93,7 +93,7 @@ test.group('filter', (group) => {
     });
     const queryBuilderSql = TestModel.query()
       .select('id', 'name')
-      .setRequest(request)
+      .withRequest(request)
       .allowedFilters('name', 'id')
       .toQuery();
     const expectedSql = TestModel.query().select('id', 'name').whereRaw('LOWER(name) LIKE ?', ['%john%']).toQuery();
@@ -452,9 +452,10 @@ test.group('filter', (group) => {
     }).allowedFilters('id');
   }).throws(/ are not allowed. Allowed filter\(s\) are/);
 
-  test('does not throw invalid filter exception when disable in config', async ({ assert, cleanup }) => {
+  test('does not throw invalid filter exception when disable in config', async (ctx) => {
+    const { assert, cleanup } = ctx;
     await app.terminate();
-    const customApp = await setupApp('web', {
+    const customApp = await setupApp(ctx, 'web', {
       apiquery: defineConfig({
         ...defaultConfigApiQuery,
         disableInvalidFilterQueryException: true,

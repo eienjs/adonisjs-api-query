@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs';
+import { mkdir } from 'node:fs/promises';
+import path from 'node:path';
 import { URL } from 'node:url';
 import { IgnitorFactory } from '@adonisjs/core/factories';
 import { RequestFactory } from '@adonisjs/core/factories/http';
@@ -8,11 +11,10 @@ import { type Database } from '@adonisjs/lucid/database';
 import { type FactoryBuilderQueryContract, type FactoryModelContract } from '@adonisjs/lucid/types/factory';
 import { type LucidModel, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
 import { getActiveTest } from '@japa/runner';
+import { type TestContext } from '@japa/runner/core';
 import { defineConfig } from '../../src/define_config.js';
 import { type ApiQueryConfig } from '../../src/types.js';
 import TestModel from './models/test_model.js';
-
-const BASE_URL = new URL('tmp/', import.meta.url);
 
 export const defaultConfigApiQuery: ApiQueryConfig = {
   parameters: {
@@ -33,9 +35,15 @@ export const defaultConfigApiQuery: ApiQueryConfig = {
 };
 
 export const setupApp = async function (
+  context: TestContext,
   env?: AppEnvironments,
   config: { database?: ReturnType<typeof defineLucidConfig>; apiquery?: ReturnType<typeof defineConfig> } = {},
 ): Promise<ApplicationService> {
+  // eslint-disable-next-line n/no-sync
+  if (!existsSync(context.fs.basePath)) {
+    await mkdir(context.fs.basePath);
+  }
+
   const ignitor = new IgnitorFactory()
     .withCoreProviders()
     .withCoreConfig()
@@ -48,7 +56,7 @@ export const setupApp = async function (
             connections: {
               sqlite: {
                 client: 'better-sqlite3',
-                connection: { filename: 'db.sqlite3' },
+                connection: { filename: path.join(context.fs.basePath, 'db.sqlite3') },
                 useNullAsDefault: true,
               },
             },
@@ -63,10 +71,10 @@ export const setupApp = async function (
         ],
       },
     })
-    .create(BASE_URL, {
+    .create(context.fs.baseUrl, {
       importer: (filePath) => {
         if (filePath.startsWith('./') || filePath.startsWith('../')) {
-          return import(new URL(filePath, BASE_URL).href);
+          return import(new URL(filePath, context.fs.baseUrl).href);
         }
 
         return import(filePath);
@@ -159,5 +167,5 @@ export const createQueryFromFilterRequest = <Model extends LucidModel = typeof T
     filter: filters,
   });
 
-  return TargetModel.query().setRequest(request) as ModelQueryBuilderContract<Model>;
+  return TargetModel.query().withRequest(request) as ModelQueryBuilderContract<Model>;
 };

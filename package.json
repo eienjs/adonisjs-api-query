@@ -35,11 +35,13 @@
     "version": "pnpm run build && pnpm run changelog"
   },
   "devDependencies": {
+    "@adonisjs/assembler": "^7.8.2",
     "@adonisjs/core": "^6.17.2",
     "@adonisjs/lucid": "^21.6.0",
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
     "@japa/assert": "^4.0.1",
+    "@japa/file-system": "^2.3.2",
     "@japa/runner": "^4.2.0",
     "@nodecfdi/eslint-config": "^3.0.0",
     "@nodecfdi/prettier-config": "^1.4.1",

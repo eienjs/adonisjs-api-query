@@ -9,8 +9,8 @@ import { createDbModels, createQueryFromFilterRequest, setupApp } from './_helpe
 test.group('filter callback', (group) => {
   let app: ApplicationService;
 
-  group.each.setup(async () => {
-    app = await setupApp();
+  group.each.setup(async ({ context }) => {
+    app = await setupApp(context, 'web');
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
 
