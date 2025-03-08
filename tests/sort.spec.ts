@@ -3,6 +3,7 @@ import { setApp } from '@adonisjs/core/services/app';
 import { type ApplicationService } from '@adonisjs/core/types';
 import { test } from '@japa/runner';
 import { Collection } from 'collect.js';
+import { DateTime } from 'luxon';
 import { AllowedFilter } from '../src/allowed_filter.js';
 import { AllowedSort } from '../src/allowed_sort.js';
 import { ApiQueryBuilderRequest } from '../src/api_query_builder_request.js';
@@ -333,9 +334,18 @@ test.group('sort', (group) => {
     const originalCollection = new Collection(result);
     const sortedCollection = originalCollection.sortBy('name');
 
+    const from = DateTime.fromISO('2016-01-01').toSQL()!;
+    const to = DateTime.fromISO('2017-01-01').toSQL()!;
+
     assert.equal(
       query.toQuery(),
-      "select * from `test_models` where `name` = 'foo' and `created_at` between '2016-01-01 00:00:00.000 -06:00' and '2017-01-01 00:00:00.000 -06:00' order by `name` desc",
+      [
+        "select * from `test_models` where `name` = 'foo' and `created_at` between '",
+        from,
+        "' and '",
+        to,
+        "' order by `name` desc",
+      ].join(''),
     );
     assert.deepEqual(sortedCollection.pluck('id').all(), originalCollection.pluck('id').all());
   });
