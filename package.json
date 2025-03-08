@@ -12,7 +12,8 @@
   ],
   "exports": {
     ".": "./build/index.js",
-    "./types": "./build/src/types.js"
+    "./types": "./build/src/types.js",
+    "./api_query_provider": "./build/providers/api_query_provider.js"
   },
   "scripts": {
     "prepare": "is-in-ci || husky",
@@ -138,7 +139,8 @@
   "tsup": {
     "entry": [
       "index.ts",
-      "src/types.ts"
+      "src/types.ts",
+      "providers/api_query_provider.ts"
     ],
     "outDir": "./build",
     "clean": true,
