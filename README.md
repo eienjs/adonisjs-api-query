@@ -17,7 +17,7 @@ This package provides a set of macros on `ModelQueryBuilder` to build [Lucid](ht
 
 ## Documentation
 
-The documentation is available on [EienJS](https://eienjs.com).
+The documentation is available on [EienJS](https://eienjs.com/packages/adonisjs-api-query/getting-started/).
 
 ## Contributing
 
