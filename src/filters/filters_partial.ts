@@ -16,7 +16,6 @@ export class FiltersPartial<Model extends LucidModel> extends FiltersExact<Model
       return;
     }
 
-    const dialect = this.getDatabaseDialect(query);
     if (Array.isArray(value)) {
       if (value.filter((item) => item.toString().length > 0).length === 0) {
         return;
@@ -24,7 +23,7 @@ export class FiltersPartial<Model extends LucidModel> extends FiltersExact<Model
 
       void query.where((subQuery) => {
         for (const partialValue of value.filter((item) => item.toString().length > 0)) {
-          const [innerSql, innerBindings] = this.getWhereRawParameters(partialValue, property, dialect);
+          const [innerSql, innerBindings] = this.getWhereRawParameters(partialValue, property);
           void subQuery.orWhereRaw(innerSql, innerBindings);
         }
       });
@@ -32,7 +31,7 @@ export class FiltersPartial<Model extends LucidModel> extends FiltersExact<Model
       return;
     }
 
-    const [sql, bindings] = this.getWhereRawParameters(value, property, dialect);
+    const [sql, bindings] = this.getWhereRawParameters(value, property);
     void query.whereRaw(sql, bindings);
   }
 
@@ -40,17 +39,10 @@ export class FiltersPartial<Model extends LucidModel> extends FiltersExact<Model
     return query.client.dialect.name;
   }
 
-  protected getWhereRawParameters(
-    value: StrictValuesWithoutRaw | null,
-    property: string,
-    dialect: DialectContract['name'],
-  ): [string, string[]] {
+  protected getWhereRawParameters(value: StrictValuesWithoutRaw | null, property: string): [string, string[]] {
     const resolvedValue = `${value}`.toLowerCase();
 
-    return [
-      `LOWER(${property}) LIKE ?${FiltersPartial.maybeSpecifyEscapeChar(dialect)}`,
-      [`%${FiltersPartial.escapeLike(resolvedValue)}%`],
-    ];
+    return [`LOWER(${property}) LIKE ?`, [`%${FiltersPartial.escapeLike(resolvedValue)}%`]];
   }
 
   protected static escapeLike(value: string): string {
@@ -58,13 +50,5 @@ export class FiltersPartial<Model extends LucidModel> extends FiltersExact<Model
       .replaceAll('\\', '\\\\')
       .replaceAll('_', String.raw`\\_`)
       .replaceAll('%', String.raw`\\%`);
-  }
-
-  protected static maybeSpecifyEscapeChar(dialect: DialectContract['name']): string {
-    if (['sqlite3', 'better-sqlite3', 'libsql', 'mssql'].includes(dialect)) {
-      return '';
-    }
-
-    return String.raw`ESCAPE '\'`;
   }
 }
