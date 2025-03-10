@@ -23,7 +23,10 @@ export class FiltersPartial<Model extends LucidModel> extends FiltersExact<Model
 
       void query.where((subQuery) => {
         for (const partialValue of value.filter((item) => item.toString().length > 0)) {
-          const [innerSql, innerBindings] = this.getWhereRawParameters(partialValue, property);
+          const [innerSql, innerBindings] = this.getWhereRawParameters(
+            partialValue,
+            this.parsePropertyToColumn(subQuery, property),
+          );
           void subQuery.orWhereRaw(innerSql, innerBindings);
         }
       });
@@ -31,8 +34,19 @@ export class FiltersPartial<Model extends LucidModel> extends FiltersExact<Model
       return;
     }
 
-    const [sql, bindings] = this.getWhereRawParameters(value, property);
+    const [sql, bindings] = this.getWhereRawParameters(value, this.parsePropertyToColumn(query, property));
     void query.whereRaw(sql, bindings);
+  }
+
+  protected parsePropertyToColumn(
+    query: ModelQueryBuilderContract<Model, InstanceType<Model>>,
+    property: string,
+  ): string {
+    if (property.includes('.')) {
+      return property;
+    }
+
+    return query.model.$getColumn(property)?.columnName ?? property;
   }
 
   protected getDatabaseDialect(query: ModelQueryBuilderContract<Model, InstanceType<Model>>): DialectContract['name'] {
@@ -42,7 +56,7 @@ export class FiltersPartial<Model extends LucidModel> extends FiltersExact<Model
   protected getWhereRawParameters(value: StrictValuesWithoutRaw | null, property: string): [string, string[]] {
     const resolvedValue = `${value}`.toLowerCase();
 
-    return [`LOWER(${property}) LIKE ?`, [`%${FiltersPartial.escapeLike(resolvedValue)}%`]];
+    return [`LOWER(??) LIKE ?`, [property, `%${FiltersPartial.escapeLike(resolvedValue)}%`]];
   }
 
   protected static escapeLike(value: string): string {
