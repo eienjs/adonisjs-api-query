@@ -3,6 +3,7 @@ import { setApp } from '@adonisjs/core/services/app';
 import { type ApplicationService } from '@adonisjs/core/types';
 import { type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
 import { type ExtractModelRelations } from '@adonisjs/lucid/types/relations';
+import { GLOBAL_STORE } from '@dpaskhin/unique';
 import { test } from '@japa/runner';
 import { type Collection } from 'collect.js';
 import { AllowedInclude } from '../src/allowed_include.js';
@@ -43,6 +44,7 @@ test.group('include', (group) => {
     app = await setupApp(context, 'web');
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
+    GLOBAL_STORE.clear();
 
     return () => app.terminate();
   });

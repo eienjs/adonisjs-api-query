@@ -1,6 +1,7 @@
 import { RequestFactory } from '@adonisjs/core/factories/http';
 import { setApp } from '@adonisjs/core/services/app';
 import { type ApplicationService } from '@adonisjs/core/types';
+import { GLOBAL_STORE } from '@dpaskhin/unique';
 import { test } from '@japa/runner';
 import { Collection } from 'collect.js';
 import { AllowedSort } from '../src/allowed_sort.js';
@@ -24,6 +25,7 @@ test.group('sort callback', (group) => {
     app = await setupApp(context, 'web');
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
+    GLOBAL_STORE.clear();
 
     return () => app.terminate();
   });

@@ -1,5 +1,6 @@
 import { setApp } from '@adonisjs/core/services/app';
 import { type ApplicationService } from '@adonisjs/core/types';
+import { GLOBAL_STORE } from '@dpaskhin/unique';
 import { test } from '@japa/runner';
 import { DateTime } from 'luxon';
 import { AllowedFilter } from '../src/allowed_filter.js';
@@ -15,6 +16,7 @@ test.group('filter trashed', (group) => {
     app = await setupApp(context, 'web');
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
+    GLOBAL_STORE.clear();
 
     return () => app.terminate();
   });

@@ -1,6 +1,7 @@
 import { RequestFactory } from '@adonisjs/core/factories/http';
 import { setApp } from '@adonisjs/core/services/app';
 import { type ApplicationService } from '@adonisjs/core/types';
+import { GLOBAL_STORE } from '@dpaskhin/unique';
 import { test } from '@japa/runner';
 import collect from 'collect.js';
 import { DateTime } from 'luxon';
@@ -28,6 +29,7 @@ test.group('filter', (group) => {
     app = await setupApp(context, 'web');
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
+    GLOBAL_STORE.clear();
 
     return () => app.terminate();
   });
@@ -96,7 +98,10 @@ test.group('filter', (group) => {
       .withRequest(request)
       .allowedFilters('name', 'id')
       .toQuery();
-    const expectedSql = TestModel.query().select('id', 'name').whereRaw('LOWER(name) LIKE ?', ['%john%']).toQuery();
+    const expectedSql = TestModel.query()
+      .select('id', 'name')
+      .whereRaw('LOWER(??) LIKE ?', ['name', '%john%'])
+      .toQuery();
 
     assert.equal(queryBuilderSql, expectedSql);
   });
@@ -129,7 +134,7 @@ test.group('filter', (group) => {
       .allowedFilters(AllowedFilter.partial('id'))
       .toQuery();
 
-    assert.include(query, 'select * from `test_models` where (LOWER(id) LIKE');
+    assert.include(query, 'select * from `test_models` where (LOWER(`id`) LIKE');
   });
 
   test('falsy values are not ignored when applying a begins with strict filter', async ({ assert }) => {
@@ -156,13 +161,13 @@ test.group('filter', (group) => {
 
   test('can filter partial using begins with strict', async ({ assert }) => {
     await createDbModels(app, TestModelFactory, 5);
-    await TestModelFactory.merge({ name: 'John Doe' }).create();
+    await TestModelFactory.merge({ fullName: 'John Doe' }).create();
     const models = await createQueryFromFilterRequest({
-      name: 'john',
-    }).allowedFilters(AllowedFilter.beginsWithStrict('name'));
+      fullName: 'john',
+    }).allowedFilters(AllowedFilter.beginsWithStrict('fullName'));
     const models2 = await createQueryFromFilterRequest({
-      name: 'doe',
-    }).allowedFilters(AllowedFilter.beginsWithStrict('name'));
+      fullName: 'doe',
+    }).allowedFilters(AllowedFilter.beginsWithStrict('fullName'));
 
     assert.lengthOf(models, 1);
     assert.lengthOf(models2, 0);
