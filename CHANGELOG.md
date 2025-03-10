@@ -5,11 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v1.0.0](https://luffynando.github.com/eienjs/adonisjs-api-query/compare/v0.2.0...v1.0.0)
+## [v1.0.1](https://luffynando.github.com/eienjs/adonisjs-api-query/compare/v1.0.0...v1.0.1)
+
+### Commits
+
+- test: :test_tube: update to usage unique values for not same names on tests [`f027646`](https://luffynando.github.com/eienjs/adonisjs-api-query/commit/f0276467c6aa2d36836bcf6786f06409c5d42d48)
+- fix: :bug: fix parse property to column name sql [`6698cae`](https://luffynando.github.com/eienjs/adonisjs-api-query/commit/6698cae31e66591e8cb05219b361ffb45c762918)
+
+## [v1.0.0](https://luffynando.github.com/eienjs/adonisjs-api-query/compare/v0.2.0...v1.0.0) - 2025-03-10
 
 ### Commits
 
 - fix: :bug: remove unnecesary escape [`c0cea9d`](https://luffynando.github.com/eienjs/adonisjs-api-query/commit/c0cea9d73bf14e3218c048d2d12ab88237c25383)
+- chore(release): :tada: 1.0.0 [`a8750d5`](https://luffynando.github.com/eienjs/adonisjs-api-query/commit/a8750d520be17d5c858b7962a1a5e86989002253)
 
 ## [v0.2.0](https://luffynando.github.com/eienjs/adonisjs-api-query/compare/v0.1.0...v0.2.0) - 2025-03-10
 
