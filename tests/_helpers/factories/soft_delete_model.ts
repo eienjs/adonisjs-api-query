@@ -1,11 +1,15 @@
 import factory from '@adonisjs/lucid/factories';
-import { unique } from '@dpaskhin/unique';
+import { UniqueEnforcer } from 'enforce-unique';
 import SoftDeleteModel from '../models/soft_delete_model.js';
+
+const uniqueEnforcerName = new UniqueEnforcer();
 
 export const SoftDeleteModelFactory = factory
   .define(SoftDeleteModel, ({ faker }) => {
     return {
-      name: unique(faker.person.firstName()),
+      name: uniqueEnforcerName.enforce(() => {
+        return faker.person.firstName();
+      }),
     };
   })
   .build();

@@ -1,7 +1,6 @@
 import { RequestFactory } from '@adonisjs/core/factories/http';
 import { setApp } from '@adonisjs/core/services/app';
 import { type ApplicationService } from '@adonisjs/core/types';
-import { GLOBAL_STORE } from '@dpaskhin/unique';
 import { test } from '@japa/runner';
 import collect from 'collect.js';
 import { DateTime } from 'luxon';
@@ -29,7 +28,6 @@ test.group('filter', (group) => {
     app = await setupApp(context, 'web');
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
-    GLOBAL_STORE.clear();
 
     return () => app.terminate();
   });
