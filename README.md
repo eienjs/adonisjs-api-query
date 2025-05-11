@@ -7,8 +7,6 @@
 [![Build Status][badge-build]][build]
 [![Total Downloads][badge-downloads]][downloads]
 
-<!-- [![Build Status][badge-build]][build] -->
-
 > Easily build Lucid queries from API requests
 
 ## Introduction
