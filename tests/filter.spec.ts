@@ -306,17 +306,17 @@ test.group('filter', (group) => {
     assert.lengthOf(modelsResult, 1);
   });
 
-  // it('can filter results by nested relation scope', function () {
-  //     $testModel = TestModel::create(['name' => 'John Testing Doe']);
+  test('can filter results by nested relation', async ({ assert }) => {
+    await createDbModels(app, TestModelFactory, 3);
+    const testModel = await TestModelFactory.merge({ name: 'John Testing Doe' }).create();
+    await testModel.related('relatedModels').create({ name: "John's Post" });
 
-  //     $testModel->relatedModels()->create(['name' => 'John\'s Post']);
+    const modelsResult = await createQueryFromFilterRequest({
+      'relatedModels.name': "John's Post",
+    }).allowedFilters(AllowedFilter.partial('relatedModels.name'));
 
-  //     $modelsResult = createQueryFromFilterRequest(['relatedModels.named' => 'John\'s Post'])
-  //         ->allowedFilters(AllowedFilter::scope('relatedModels.named'))
-  //         ->get();
-
-  //     expect($modelsResult)->toHaveCount(1);
-  // });
+    assert.lengthOf(modelsResult, 1);
+  });
 
   test('can filter results by type hinted scope using callback', async ({ assert }) => {
     await createDbModels(app, TestModelFactory, 3);

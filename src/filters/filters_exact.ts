@@ -65,13 +65,15 @@ export class FiltersExact<Model extends LucidModel> implements Filter<Model> {
     value: StrictValuesWithoutRaw | null,
     property: string,
   ): void {
-    const [relation, relationProperty] = collect(property.split('.')).pipe((parts: Collection<string>) => [
-      parts.except([parts.last()]).implode('.') as ExtractModelRelations<InstanceType<Model>>,
-      parts.last(),
-    ]);
+    const [relation, relationProperty] = collect(property.split('.')).pipe((parts: Collection<string>) => {
+      const rProperty = parts.pop();
+      const rPath = parts.implode('.');
+
+      return [rPath as ExtractModelRelations<InstanceType<Model>>, rProperty];
+    });
 
     void query.whereHas(relation, (subQuery: ModelQueryBuilderContract<Model>) => {
-      const columnName = this.qualifyColumn(query, relationProperty);
+      const columnName = this.qualifyColumn(subQuery, relationProperty);
       this.relationConstraints.push(columnName);
 
       this.handle(subQuery, value, columnName);
