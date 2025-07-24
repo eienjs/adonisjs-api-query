@@ -39,7 +39,6 @@ export const setupApp = async function (
   env?: AppEnvironments,
   config: { database?: ReturnType<typeof defineLucidConfig>; apiquery?: ReturnType<typeof defineConfig> } = {},
 ): Promise<ApplicationService> {
-  // eslint-disable-next-line n/no-sync
   if (!existsSync(context.fs.basePath)) {
     await mkdir(context.fs.basePath);
   }
