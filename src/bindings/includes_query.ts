@@ -1,9 +1,9 @@
-import { type ModelQueryBuilder } from '@adonisjs/lucid/orm';
-import { type LucidModel } from '@adonisjs/lucid/types/model';
+import type { ModelQueryBuilder } from '@adonisjs/lucid/orm';
+import type { LucidModel } from '@adonisjs/lucid/types/model';
+import type { ResolvedApiQueryConfig } from '../types.js';
 import { Collection } from 'collect.js';
 import { AllowedInclude } from '../allowed_include.js';
 import { InvalidIncludeQuery } from '../exceptions/invalid_include_query.js';
-import { type ResolvedApiQueryConfig } from '../types.js';
 
 type ModelQueryBuilderWithAllowedIncludes = ModelQueryBuilder & {
   _allowedIncludes: Collection<AllowedInclude<LucidModel>>;

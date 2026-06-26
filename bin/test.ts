@@ -12,6 +12,7 @@ configure({
     activated: ['spec'],
     list: [ndjson(), spec()],
   },
+  forceExit: true,
 });
 
 void run();

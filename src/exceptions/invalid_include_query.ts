@@ -2,6 +2,10 @@ import { ResponseStatus } from '@adonisjs/core/http';
 import { InvalidQuery } from './invalid_query.js';
 
 export class InvalidIncludeQuery extends InvalidQuery {
+  public static includesNotAllowed(unknownIncludes: string[], allowedIncludes: string[]): InvalidIncludeQuery {
+    return new InvalidIncludeQuery(unknownIncludes, allowedIncludes);
+  }
+
   public constructor(
     public readonly unknownIncludes: string[],
     public readonly allowedIncludes: string[],
@@ -11,15 +15,11 @@ export class InvalidIncludeQuery extends InvalidQuery {
 
     if (allowedIncludes.length > 0) {
       const allowed = allowedIncludes.join(', ');
-      message = `${message}Allowed include(s) are \`${allowed}\``;
+      message += `Allowed include(s) are \`${allowed}\``;
     } else {
-      message = `${message}There are no allowed includes`;
+      message += 'There are no allowed includes';
     }
 
     super(message, { status: ResponseStatus.BadRequest });
-  }
-
-  public static includesNotAllowed(unknownIncludes: string[], allowedIncludes: string[]): InvalidIncludeQuery {
-    return new InvalidIncludeQuery(unknownIncludes, allowedIncludes);
   }
 }

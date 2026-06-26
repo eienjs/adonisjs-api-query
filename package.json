@@ -1,80 +1,9 @@
 {
   "name": "@eienjs/adonisjs-api-query",
-  "description": "Easily build Lucid queries from API requests",
-  "version": "1.1.1",
   "type": "module",
-  "module": "./build/index.js",
-  "types": "./build/index.d.ts",
-  "files": [
-    "build",
-    "!build/bin",
-    "!build/tests"
-  ],
-  "exports": {
-    ".": "./build/index.js",
-    "./types": "./build/src/types.js",
-    "./api_query_provider": "./build/providers/api_query_provider.js"
-  },
-  "scripts": {
-    "prepare": "is-in-ci || husky",
-    "clean": "del-cli build",
-    "copy:templates": "copyfiles \"stubs/**/*.stub\" build --up 1",
-    "changelog": "auto-changelog -p && git add CHANGELOG.md",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint . --fix",
-    "lint:check": "eslint .",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "test": "node --import ts-node-maintained/register/esm --enable-source-maps bin/test.ts",
-    "test:coverage": "c8 pnpm run test",
-    "tool:code": "pnpm run lint:check && pnpm run format:check && pnpm run typecheck",
-    "tool:build": "pnpm run tool:code && pnpm run test",
-    "prebuild": "pnpm run tool:code && pnpm run clean",
-    "build": "tsup-node --metafile && tsc --emitDeclarationOnly --declaration",
-    "postbuild": "pnpm run copy:templates",
-    "release": "np",
-    "version": "pnpm run build && pnpm run changelog"
-  },
-  "devDependencies": {
-    "@adonisjs/assembler": "^7.8.2",
-    "@adonisjs/core": "^6.17.2",
-    "@adonisjs/lucid": "^21.6.0",
-    "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
-    "@japa/assert": "^4.1.1",
-    "@japa/file-system": "^2.3.2",
-    "@japa/runner": "^4.3.0",
-    "@nodecfdi/eslint-config": "^3.5.1",
-    "@nodecfdi/prettier-config": "^1.4.1",
-    "@nodecfdi/tsconfig": "^1.7.4",
-    "@poppinss/hooks": "^7.2.6",
-    "@swc/core": "^1.13.2",
-    "@types/luxon": "^3.6.2",
-    "@types/node": "^22.16.5",
-    "adonis-lucid-soft-deletes": "^2.1.0",
-    "auto-changelog": "^2.5.0",
-    "better-sqlite3": "^12.2.0",
-    "c8": "^10.1.3",
-    "del-cli": "^6.0.0",
-    "enforce-unique": "^1.3.0",
-    "eslint": "^9.31.0",
-    "husky": "^9.1.7",
-    "is-in-ci": "^1.0.0",
-    "luxon": "^3.7.1",
-    "native-copyfiles": "^1.3.5",
-    "np": "^10.2.0",
-    "prettier": "^3.6.2",
-    "ts-node-maintained": "^10.9.5",
-    "tsup": "^8.5.0",
-    "typescript": "^5.8.3"
-  },
-  "dependencies": {
-    "collect.js": "^4.36.1"
-  },
-  "peerDependencies": {
-    "@adonisjs/core": "^6.17.2",
-    "@adonisjs/lucid": "^21.6.0"
-  },
+  "version": "1.1.1",
+  "packageManager": "pnpm@11.9.0",
+  "description": "Easily build Lucid queries from API requests",
   "author": "Fernando Isidro <luffynando@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/eienjs/adonisjs-api-query",
@@ -96,20 +25,75 @@
     "sort",
     "includes"
   ],
-  "engines": {
-    "node": ">=20.6.0"
+  "exports": {
+    ".": "./build/index.mjs",
+    "./types": "./build/src/types.mjs",
+    "./api_query_provider": "./build/providers/api_query_provider.mjs"
   },
-  "packageManager": "pnpm@10.13.1",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@swc/core",
-      "better-sqlite3",
-      "esbuild",
-      "unrs-resolver"
-    ],
-    "ignoredBuiltDependencies": [
-      "nx"
-    ]
+  "files": [
+    "build"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "prepare": "is-in-ci || husky",
+    "changelog": "auto-changelog -u -p",
+    "commitlint": "commitlint --edit",
+    "index:commands": "adonis-kit index build/commands",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import=@poppinss/ts-exec --enable-source-maps bin/test.ts",
+    "test:coverage": "c8 pnpm run test",
+    "tool:code": "pnpm run lint:check && pnpm run typecheck",
+    "tool:build": "pnpm run tool:code && pnpm run test",
+    "prebuild": "pnpm run tool:code",
+    "build": "tsdown",
+    "release": "release-it"
+  },
+  "peerDependencies": {
+    "@adonisjs/assembler": "^8.4.0",
+    "@adonisjs/core": "^7.3.4",
+    "@adonisjs/lucid": "^22.4.2"
+  },
+  "peerDependenciesMeta": {
+    "@adonisjs/assembler": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "collect.js": "^4.36.1"
+  },
+  "devDependencies": {
+    "@adonisjs/assembler": "^8.4.0",
+    "@adonisjs/core": "^7.3.4",
+    "@adonisjs/eslint-plugin": "^2.2.2",
+    "@adonisjs/lucid": "^22.4.2",
+    "@adonisjs/tsconfig": "^2.0.0",
+    "@commitlint/cli": "^21.1.0",
+    "@commitlint/config-conventional": "^21.1.0",
+    "@eienjs/eslint-config": "^2.1.0",
+    "@japa/assert": "^4.2.0",
+    "@japa/file-system": "^3.0.0",
+    "@japa/runner": "^5.3.0",
+    "@poppinss/ts-exec": "^1.4.4",
+    "@types/luxon": "^3.7.2",
+    "@types/node": "^24.13.2",
+    "adonis-lucid-soft-deletes": "^2.1.0",
+    "auto-changelog": "^2.6.0",
+    "better-sqlite3": "^12.11.1",
+    "c8": "^11.0.0",
+    "enforce-unique": "^1.3.0",
+    "eslint": "^10.5.0",
+    "eslint-plugin-erasable-syntax-only": "^0.4.2",
+    "husky": "^9.1.7",
+    "is-in-ci": "^2.0.0",
+    "luxon": "^3.7.2",
+    "release-it": "^20.2.0",
+    "tsdown": "^0.22.3",
+    "tsdown-stale-guard": "^0.1.2",
+    "typescript": "^6.0.3"
   },
   "c8": {
     "reporter": [
@@ -126,20 +110,47 @@
       "@commitlint/config-conventional"
     ]
   },
-  "prettier": "@nodecfdi/prettier-config/pkg",
   "publishConfig": {
     "access": "public",
     "tag": "latest"
   },
   "auto-changelog": {
     "template": "keepachangelog",
-    "hideCredit": true
+    "hideCredit": true,
+    "commitLimit": false
   },
-  "np": {
-    "message": "chore(release): :tada: %s",
-    "tag": "latest",
-    "branch": "main",
-    "testScript": "test"
+  "release-it": {
+    "git": {
+      "commit": true,
+      "tag": true,
+      "push": true,
+      "requireCleanWorkingDir": true,
+      "commitMessage": "chore(release): :tada: v${version}",
+      "tagAnnotation": "chore(release): :tada: v${version}"
+    },
+    "github": {
+      "release": true,
+      "web": true,
+      "releaseName": "Release v${version}"
+    },
+    "npm": {
+      "publish": true,
+      "publishPackageManager": "pnpm",
+      "publishArgs": [
+        "--no-git-checks"
+      ]
+    },
+    "hooks": {
+      "before:init": [
+        "pnpm run lint:check",
+        "pnpm run typecheck",
+        "pnpm test"
+      ],
+      "after:bump": [
+        "pnpm run build",
+        "pnpm run changelog"
+      ]
+    }
   },
   "tsup": {
     "entry": [

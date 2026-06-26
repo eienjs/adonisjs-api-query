@@ -1,17 +1,29 @@
-node_modules
-coverage
-
-.DS_STORE
-.nyc_output
-.idea
-.vscode/
-*.sublime-project
-*.sublime-workspace
+### Node template
+# Logs
+logs
 *.log
-db.sqlite3
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-build
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Generated build files
 dist
+build
+coverage
+.eslint-config-inspector
+
+# Output of 'npm pack'
+*.tgz
+
+# IDE
+.idea
+.vscode
+
+# Lock files for other packages
+package-lock.json
 yarn.lock
 shrinkwrap.yaml
-package-lock.json

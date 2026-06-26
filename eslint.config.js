@@ -1,6 +1,21 @@
-// @ts-check
-import nodecfdiConfig from '@nodecfdi/eslint-config';
+import eienjs from '@eienjs/eslint-config';
 
-const { defineConfig } = nodecfdiConfig(import.meta.dirname, { adonisjs: true, sonarjs: true, n: true });
-
-export default defineConfig();
+export default eienjs({
+  adonisjs: true,
+  typescript: {
+    tsconfigPath: 'tsconfig.json',
+    erasableSyntaxOnly: {
+      parameterProperties: false,
+    },
+  },
+}).append({
+  files: ['providers/*.ts'],
+  rules: {
+    '@typescript-eslint/method-signature-style': 'off',
+  },
+}, {
+  files: ['src/bindings/*.ts'],
+  rules: {
+    'unicorn/no-this-outside-of-class': 'off',
+  },
+});

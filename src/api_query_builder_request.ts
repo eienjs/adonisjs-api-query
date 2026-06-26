@@ -1,4 +1,4 @@
-import { HttpContext, type Request } from '@adonisjs/core/http';
+import { HttpContext, type HttpRequest } from '@adonisjs/core/http';
 import app from '@adonisjs/core/services/app';
 import { Collection } from 'collect.js';
 import { strAfterLast, strBeforeLast } from './utils/helpers.js';
@@ -70,13 +70,13 @@ export class ApiQueryBuilderRequest {
     this.filterArrayValueDelimiter = ',';
   }
 
-  public static fromRequest(request: Request): ApiQueryBuilderRequest {
+  public static fromRequest(request: HttpRequest): ApiQueryBuilderRequest {
     return new ApiQueryBuilderRequest(request);
   }
 
-  private readonly _request: Request;
+  private readonly _request: HttpRequest;
 
-  public constructor(request?: Request) {
+  public constructor(request?: HttpRequest) {
     if (!request) {
       const ctx = HttpContext.getOrFail();
       request = ctx.request;

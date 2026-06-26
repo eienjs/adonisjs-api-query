@@ -1,20 +1,21 @@
-import { type LucidModel, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
-import { type StrictValuesWithoutRaw } from '@adonisjs/lucid/types/querybuilder';
-import { type ExtractModelRelations } from '@adonisjs/lucid/types/relations';
-import collect, { type Collection } from 'collect.js';
-import { type Filter } from '../types.js';
+import type { LucidModel, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import type { StrictValuesWithoutRaw } from '@adonisjs/lucid/types/querybuilder';
+import type { ExtractModelRelations } from '@adonisjs/lucid/types/relations';
+import type { Collection } from 'collect.js';
+import type { Filter } from '../types.js';
+import collect from 'collect.js';
 
 export class FiltersExact<Model extends LucidModel> implements Filter<Model> {
   protected relationConstraints: string[] = [];
 
-  public constructor(protected addRelationConstraint = true) {}
+  public constructor(protected shouldAddRelationConstraint = true) {}
 
   public handle(
     query: ModelQueryBuilderContract<Model, InstanceType<Model>>,
     value: StrictValuesWithoutRaw | null,
     property: string,
   ): void {
-    if (this.addRelationConstraint && this.isRelationProperty(query, property)) {
+    if (this.shouldAddRelationConstraint && this.isRelationProperty(query, property)) {
       this.withRelationConstraint(query, value, property);
 
       return;
@@ -55,7 +56,7 @@ export class FiltersExact<Model extends LucidModel> implements Filter<Model> {
       return false;
     }
 
-    const firstRelationShip = property.split('.')[0];
+    const firstRelationShip = property.split('.', 1)[0];
 
     return query.model.$relationsDefinitions.has(firstRelationShip);
   }

@@ -1,11 +1,14 @@
-import { type ModelQueryBuilder } from '@adonisjs/lucid/orm';
-import { type LucidModel } from '@adonisjs/lucid/types/model';
-import { collect, type Collection } from 'collect.js';
+import type { ModelQueryBuilder } from '@adonisjs/lucid/orm';
+import type { LucidModel } from '@adonisjs/lucid/types/model';
+import type { Collection } from 'collect.js';
+import type { ResolvedApiQueryConfig } from '../types.js';
+import { collect } from 'collect.js';
 import { AllowedSort } from '../allowed_sort.js';
 import { InvalidSortQuery } from '../exceptions/invalid_sort_query.js';
-import { type ResolvedApiQueryConfig } from '../types.js';
 
 type ModelQueryBuilderWithAllowedSorts = ModelQueryBuilder & { _allowedSorts: Collection<AllowedSort<LucidModel>> };
+
+const DESCENDING_ORDER_PREFIX = /^-+/;
 
 export const extendModelQueryBuilderWithSortsQuery = function (
   builder: typeof ModelQueryBuilder,
@@ -16,7 +19,7 @@ export const extendModelQueryBuilderWithSortsQuery = function (
       return;
     }
 
-    const requestedSortNames = self.$apiQueryBuilderRequest.sorts().map((sort) => sort.replace(/^-+/, ''));
+    const requestedSortNames = self.$apiQueryBuilderRequest.sorts().map((sort) => sort.replace(DESCENDING_ORDER_PREFIX, ''));
     const allowedSortNames = self._allowedSorts.map((sort) => sort.getName());
     const unknownSort = requestedSortNames.diff(allowedSortNames);
 
@@ -31,11 +34,11 @@ export const extendModelQueryBuilderWithSortsQuery = function (
 
   const addRequestedSortsToQuery = (self: ModelQueryBuilderWithAllowedSorts): void => {
     self.$apiQueryBuilderRequest.sorts().each((property) => {
-      const descending = property.startsWith('-');
-      const key = property.replace(/^-+/, '');
+      const isDescending = property.startsWith('-');
+      const key = property.replace(DESCENDING_ORDER_PREFIX, '');
       const sort = findSort(self, key);
 
-      sort?.sort(self, descending);
+      sort?.sort(self, isDescending);
     });
   };
 
@@ -47,7 +50,7 @@ export const extendModelQueryBuilderWithSortsQuery = function (
         return sort;
       }
 
-      return AllowedSort.field(sort.replace(/^-+/, ''));
+      return AllowedSort.field(sort.replace(DESCENDING_ORDER_PREFIX, ''));
     });
 
     ensureAllSortsExist(this);

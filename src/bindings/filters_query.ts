@@ -1,10 +1,10 @@
-/* eslint-disable unicorn/no-array-method-this-argument, unicorn/no-array-callback-reference */
-import { type ModelQueryBuilder } from '@adonisjs/lucid/orm';
-import { type LucidModel } from '@adonisjs/lucid/types/model';
-import collect, { type Collection } from 'collect.js';
+import type { ModelQueryBuilder } from '@adonisjs/lucid/orm';
+import type { LucidModel } from '@adonisjs/lucid/types/model';
+import type { Collection } from 'collect.js';
+import type { ResolvedApiQueryConfig } from '../types.js';
+import collect from 'collect.js';
 import { AllowedFilter } from '../allowed_filter.js';
 import { InvalidFilterQuery } from '../exceptions/invalid_filter_query.js';
-import { type ResolvedApiQueryConfig } from '../types.js';
 
 type ModelQueryBuilderWithAllowedFilters = ModelQueryBuilder & {
   _allowedFilters: Collection<AllowedFilter<LucidModel>>;

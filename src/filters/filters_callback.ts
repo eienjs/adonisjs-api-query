@@ -1,5 +1,5 @@
-import { type LucidModel, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
-import { type Filter } from '../types.js';
+import type { LucidModel, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import type { Filter } from '../types.js';
 
 export class FiltersCallback<Model extends LucidModel> implements Filter<Model> {
   public constructor(

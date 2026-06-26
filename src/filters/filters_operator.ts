@@ -1,17 +1,17 @@
-import { type LucidModel, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
-import { type StrictValuesWithoutRaw } from '@adonisjs/lucid/types/querybuilder';
+import type { LucidModel, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import type { StrictValuesWithoutRaw } from '@adonisjs/lucid/types/querybuilder';
+import type { Filter } from '../types.js';
 import { FilterOperator } from '../enums/filter_operator.js';
-import { type Filter } from '../types.js';
 import { substrReplace } from '../utils/helpers.js';
 import { FiltersExact } from './filters_exact.js';
 
 export class FiltersOperator<Model extends LucidModel> extends FiltersExact<Model> implements Filter<Model> {
   public constructor(
-    protected $addRelationConstraint: boolean,
+    protected should$addRelationConstraint: boolean,
     protected $filterOperator: FilterOperator,
     protected $boolean: 'and' | 'or',
   ) {
-    super($addRelationConstraint);
+    super(should$addRelationConstraint);
   }
 
   public handle(

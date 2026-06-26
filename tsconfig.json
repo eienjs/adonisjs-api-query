@@ -1,7 +1,6 @@
 {
-  "extends": "@nodecfdi/tsconfig/tsconfig.pkg.json",
+  "extends": "@adonisjs/tsconfig/tsconfig.package.json",
   "compilerOptions": {
-    "rootDir": "./",
     "outDir": "./build"
   }
 }

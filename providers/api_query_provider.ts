@@ -1,22 +1,22 @@
+import type { HttpRequest } from '@adonisjs/core/http';
+import type { ApplicationService } from '@adonisjs/core/types';
+import type { LucidModel } from '@adonisjs/lucid/types/model';
+import type { ExtractModelRelations } from '@adonisjs/lucid/types/relations';
+import type { Collection } from 'collect.js';
+import type { AllowedFilter } from '../src/allowed_filter.js';
+import type { AllowedInclude } from '../src/allowed_include.js';
+import type { AllowedSort } from '../src/allowed_sort.js';
+import type { ApiQueryBuilderRequest } from '../src/api_query_builder_request.js';
+import type {
+  ApiQueryConfig,
+  ExtractKeys,
+  HintedString,
+  ResolvedApiQueryConfig,
+  SortUnionKeyParams,
+} from '../src/types.js';
 import { configProvider } from '@adonisjs/core';
 import { RuntimeException } from '@adonisjs/core/exceptions';
-import { type Request } from '@adonisjs/core/http';
-import { type ApplicationService } from '@adonisjs/core/types';
 import { ModelQueryBuilder } from '@adonisjs/lucid/orm';
-import { type LucidModel } from '@adonisjs/lucid/types/model';
-import { type ExtractModelRelations } from '@adonisjs/lucid/types/relations';
-import { type Collection } from 'collect.js';
-import { type AllowedFilter } from '../src/allowed_filter.js';
-import { type AllowedInclude } from '../src/allowed_include.js';
-import { type AllowedSort } from '../src/allowed_sort.js';
-import { type ApiQueryBuilderRequest } from '../src/api_query_builder_request.js';
-import {
-  type ApiQueryConfig,
-  type ExtractKeys,
-  type HintedString,
-  type ResolvedApiQueryConfig,
-  type SortUnionKeyParams,
-} from '../src/types.js';
 
 export default class ApiQueryProvider {
   public constructor(protected app: ApplicationService) {}
@@ -44,7 +44,7 @@ export default class ApiQueryProvider {
 
 declare module '@adonisjs/lucid/orm' {
   interface ModelQueryBuilder {
-    withRequest(request: Request): this;
+    withRequest(request: HttpRequest): this;
     $apiQueryBuilderRequest: ApiQueryBuilderRequest;
 
     allowedSorts(...sorts: (AllowedSort<LucidModel> | string)[]): this;
@@ -61,9 +61,9 @@ declare module '@adonisjs/lucid/orm' {
 }
 
 declare module '@adonisjs/lucid/types/model' {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line unused-imports/no-unused-vars, @typescript-eslint/no-unused-vars
   interface ModelQueryBuilderContract<Model extends LucidModel, Result = InstanceType<Model>> {
-    withRequest(request: Request): this;
+    withRequest(request: HttpRequest): this;
 
     allowedSorts(...sorts: (AllowedSort<Model> | HintedString<SortUnionKeyParams<Model>>)[]): this;
     allowedSorts(sorts: (AllowedSort<Model> | HintedString<SortUnionKeyParams<Model>>)[]): this;

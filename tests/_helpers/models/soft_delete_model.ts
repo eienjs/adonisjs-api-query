@@ -1,5 +1,3 @@
-/// <reference types="@poppinss/hooks" />
-
 import { compose } from '@adonisjs/core/helpers';
 import { BaseModel, column, scope } from '@adonisjs/lucid/orm';
 import { type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
