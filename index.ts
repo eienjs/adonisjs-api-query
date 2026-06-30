@@ -15,8 +15,6 @@ export { InvalidIncludeQuery } from './src/exceptions/invalid_include_query.js';
 export { InvalidQuery } from './src/exceptions/invalid_query.js';
 export { InvalidSortQuery } from './src/exceptions/invalid_sort_query.js';
 export { UnknownIncludedFieldsQuery } from './src/exceptions/unknown_included_fields_query.js';
-export { stubsRoot } from './stubs/main.js';
-export * from 'collect.js';
 // Filters
 export { FiltersBeginWithStrict } from './src/filters/filters_begin_with_strict.js';
 export { FiltersCallback } from './src/filters/filters_callback.js';
@@ -32,3 +30,5 @@ export { IncludedRelationship } from './src/includes/included_relationship.js';
 // Sorts
 export { SortsCallback } from './src/sorts/sorts_callback.js';
 export { SortsField } from './src/sorts/sorts_field.js';
+export { stubsRoot } from './stubs/main.js';
+export * from 'collect.js';

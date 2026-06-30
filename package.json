@@ -27,8 +27,8 @@
   ],
   "exports": {
     ".": "./build/index.js",
-    "./types": "./build/types.js",
     "./providers/api_query_provider": "./build/providers/api_query_provider.js",
+    "./types": "./build/types.js",
     "./package.json": "./package.json"
   },
   "types": "build/index.d.ts",

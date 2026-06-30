@@ -5,7 +5,7 @@ export const configure = async (command: Configure): Promise<void> => {
   const codemods = await command.createCodemods();
 
   await codemods.updateRcFile((rcFile) => {
-    rcFile.addProvider('@eienjs/adonisjs-api-query/api_query_provider');
+    rcFile.addProvider('@eienjs/adonisjs-api-query/providers/api_query_provider');
   });
 
   await codemods.makeUsingStub(stubsRoot, 'config.stub', {});
