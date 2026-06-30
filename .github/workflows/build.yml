@@ -9,4 +9,4 @@ jobs:
     uses: eienjs/.github/.github/workflows/quality_code.yml@main
 
   tests:
-    uses: eienjs/.github/.github/workflows/tests.yml@main
+    uses: eienjs/.github/.github/workflows/tests_adonisjs.yml@main
