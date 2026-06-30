@@ -2,15 +2,17 @@ import { defineConfig } from 'tsdown';
 import { StaleGuardRecorder } from 'tsdown-stale-guard';
 
 export default defineConfig({
-  entry: ['index.ts', 'src/types.ts', 'providers/api_query_provider.ts'],
+  entry: [
+    'index.ts',
+    { types: 'src/types.ts' },
+    { 'providers/*': 'providers/*.ts' },
+  ],
   outDir: 'build',
   clean: true,
-  format: 'esm',
+  format: ['esm'],
   minify: 'dce-only',
   fixedExtension: false,
   dts: true,
-  treeshake: false,
-  sourcemap: false,
   target: 'esnext',
   exports: true,
   // exports: {
@@ -21,6 +23,9 @@ export default defineConfig({
   //   },
   // }, // Add this back when need commands
   unbundle: true,
+  deps: {
+    skipNodeModulesBundle: true,
+  },
   copy: [
     { from: 'stubs/**/*.stub', to: 'build/stubs', flatten: false },
   ],

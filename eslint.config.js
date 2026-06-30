@@ -2,6 +2,7 @@ import eienjs from '@eienjs/eslint-config';
 
 export default eienjs({
   adonisjs: true,
+  markdown: true,
   typescript: {
     tsconfigPath: 'tsconfig.json',
     erasableSyntaxOnly: {
@@ -9,13 +10,21 @@ export default eienjs({
     },
   },
 }).append({
-  files: ['providers/*.ts'],
   rules: {
-    '@typescript-eslint/method-signature-style': 'off',
+    '@typescript-eslint/restrict-template-expressions': 'off',
+    '@typescript-eslint/no-base-to-string': 'off',
   },
 }, {
-  files: ['src/bindings/*.ts'],
+  files: ['src/define_config.ts'],
   rules: {
-    'unicorn/no-this-outside-of-class': 'off',
+    '@typescript-eslint/require-await': 'off',
+  },
+}, {
+  files: ['tests/**/*.ts'],
+  rules: {
+    'e18e/prefer-static-regex': 'off',
+    '@typescript-eslint/no-unsafe-call': 'off',
+    '@typescript-eslint/no-unsafe-member-access': 'off',
+    '@typescript-eslint/promise-function-async': 'off',
   },
 });
