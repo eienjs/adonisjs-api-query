@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/method-signature-style */
 import type { HttpRequest } from '@adonisjs/core/http';
 import type { ApplicationService } from '@adonisjs/core/types';
 import type { LucidModel } from '@adonisjs/lucid/types/model';

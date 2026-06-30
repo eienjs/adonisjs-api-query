@@ -1,23 +1,9 @@
-import { type LucidModel, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
-import { type ExtractModelRelations, type ModelRelations } from '@adonisjs/lucid/types/relations';
+import type { LucidModel, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import type { ExtractModelRelations, ModelRelations } from '@adonisjs/lucid/types/relations';
+import type { Include } from '../types.js';
 import { Collection } from 'collect.js';
-import { type Include } from '../types.js';
 
 export class IncludedRelationship<ParentModel extends LucidModel> implements Include<ParentModel> {
-  public static getIndividualRelationshipPathsFromInclude(include: string): Collection<string> {
-    const originalInclude = new Collection(include.split('.'));
-
-    return originalInclude.reduce((includes, relationship) => {
-      const includesArray = includes ?? new Collection<string>();
-
-      if (includesArray.isEmpty()) {
-        return includesArray.push(relationship);
-      }
-
-      return includesArray.push(`${includes!.last()}.${relationship}`);
-    }, new Collection<string>()) as Collection<string>;
-  }
-
   public getRequestedFieldsForRelatedTable?: (relationship: string) => string[];
 
   public handle(query: ModelQueryBuilderContract<ParentModel, InstanceType<ParentModel>>, relationship: string): void {
@@ -43,6 +29,20 @@ export class IncludedRelationship<ParentModel extends LucidModel> implements Inc
 
       this.buildNestedQuery(rest, subQuery, relation);
     });
+  }
+
+  public static getIndividualRelationshipPathsFromInclude(include: string): Collection<string> {
+    const originalInclude = new Collection(include.split('.'));
+
+    return originalInclude.reduce((includes, relationship) => {
+      const includesArray = includes ?? new Collection<string>();
+
+      if (includesArray.isEmpty()) {
+        return includesArray.push(relationship);
+      }
+
+      return includesArray.push(`${includes!.last()}.${relationship}`);
+    }, new Collection<string>()) as Collection<string>;
   }
 
   private buildNestedQuery<SubParentModel extends LucidModel, SubRelatedModel extends LucidModel>(

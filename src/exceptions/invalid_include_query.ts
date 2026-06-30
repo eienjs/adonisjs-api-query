@@ -2,10 +2,6 @@ import { ResponseStatus } from '@adonisjs/core/http';
 import { InvalidQuery } from './invalid_query.js';
 
 export class InvalidIncludeQuery extends InvalidQuery {
-  public static includesNotAllowed(unknownIncludes: string[], allowedIncludes: string[]): InvalidIncludeQuery {
-    return new InvalidIncludeQuery(unknownIncludes, allowedIncludes);
-  }
-
   public constructor(
     public readonly unknownIncludes: string[],
     public readonly allowedIncludes: string[],
@@ -21,5 +17,9 @@ export class InvalidIncludeQuery extends InvalidQuery {
     }
 
     super(message, { status: ResponseStatus.BadRequest });
+  }
+
+  public static includesNotAllowed(unknownIncludes: string[], allowedIncludes: string[]): InvalidIncludeQuery {
+    return new InvalidIncludeQuery(unknownIncludes, allowedIncludes);
   }
 }

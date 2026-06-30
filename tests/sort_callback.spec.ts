@@ -1,6 +1,6 @@
+import type { ApplicationService } from '@adonisjs/core/types';
 import { RequestFactory } from '@adonisjs/core/factories/http';
 import { setApp } from '@adonisjs/core/services/app';
-import { type ApplicationService } from '@adonisjs/core/types';
 import { test } from '@japa/runner';
 import { Collection } from 'collect.js';
 import { AllowedSort } from '../src/allowed_sort.js';
@@ -25,7 +25,7 @@ test.group('sort callback', (group) => {
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
 
-    return () => app.terminate();
+    return async () => app.terminate();
   });
 
   test('should sort by closure', async ({ assert }) => {

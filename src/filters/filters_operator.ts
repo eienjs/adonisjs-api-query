@@ -1,27 +1,27 @@
 import type { LucidModel, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
 import type { StrictValuesWithoutRaw } from '@adonisjs/lucid/types/querybuilder';
-import type { Filter } from '../types.js';
+import type { EnumType, Filter } from '../types.js';
 import { FilterOperator } from '../enums/filter_operator.js';
 import { substrReplace } from '../utils/helpers.js';
 import { FiltersExact } from './filters_exact.js';
 
 export class FiltersOperator<Model extends LucidModel> extends FiltersExact<Model> implements Filter<Model> {
   public constructor(
-    protected should$addRelationConstraint: boolean,
-    protected $filterOperator: FilterOperator,
-    protected $boolean: 'and' | 'or',
+    protected shouldAddRelationConstraint: boolean,
+    protected filterOperator: EnumType<typeof FilterOperator>,
+    protected boolean: 'and' | 'or',
   ) {
-    super(should$addRelationConstraint);
+    super(shouldAddRelationConstraint);
   }
 
   public handle(
     query: ModelQueryBuilderContract<Model, InstanceType<Model>>,
-    value: StrictValuesWithoutRaw,
+    value: StrictValuesWithoutRaw | null,
     property: string,
   ): void {
-    let filterOperator = this.$filterOperator;
+    let { filterOperator } = this;
 
-    if (this.$addRelationConstraint && this.isRelationProperty(query, property)) {
+    if (this.shouldAddRelationConstraint && this.isRelationProperty(query, property)) {
       this.withRelationConstraint(query, value, property);
 
       return;
@@ -39,12 +39,18 @@ export class FiltersOperator<Model extends LucidModel> extends FiltersExact<Mode
       return;
     }
 
+    if (value === null) {
+      void query.whereNull(this.qualifyColumn(query, property));
+
+      return;
+    }
+
     if (filterOperator === FilterOperator.Dynamic) {
       filterOperator = this.getDynamicFilterOperator(value.toString());
       value = this.removeDynamicFilterOperatorFromValue(value.toString(), filterOperator);
     }
 
-    if (this.$boolean === 'and') {
+    if (this.boolean === 'and') {
       void query.where(this.qualifyColumn(query, property), filterOperator, value);
 
       return;
@@ -53,8 +59,8 @@ export class FiltersOperator<Model extends LucidModel> extends FiltersExact<Mode
     void query.orWhere(this.qualifyColumn(query, property), filterOperator, value);
   }
 
-  protected getDynamicFilterOperator(value: string): FilterOperator {
-    let filterOperator: FilterOperator = FilterOperator.Equal;
+  protected getDynamicFilterOperator(value: string): EnumType<typeof FilterOperator> {
+    let filterOperator: EnumType<typeof FilterOperator> = FilterOperator.Equal;
 
     for (const filterOperatorCase of Object.values(FilterOperator)) {
       if (value.startsWith(filterOperatorCase) && filterOperatorCase !== FilterOperator.Dynamic) {
@@ -65,7 +71,7 @@ export class FiltersOperator<Model extends LucidModel> extends FiltersExact<Mode
     return filterOperator;
   }
 
-  protected removeDynamicFilterOperatorFromValue(value: string, filterOperator: FilterOperator): string {
+  protected removeDynamicFilterOperatorFromValue(value: string, filterOperator: EnumType<typeof FilterOperator>): string {
     if (value.includes(filterOperator)) {
       value = substrReplace(value, '', 0, filterOperator.length);
     }

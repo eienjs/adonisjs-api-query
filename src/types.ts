@@ -1,5 +1,5 @@
-import { type LucidModel, type ModelAttributes, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
-import { type StrictValuesWithoutRaw } from '@adonisjs/lucid/types/querybuilder';
+import type { LucidModel, ModelAttributes, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import type { StrictValuesWithoutRaw } from '@adonisjs/lucid/types/querybuilder';
 
 export interface ApiQueryConfigParameters {
   include?: string;
@@ -81,20 +81,22 @@ export interface ApiQueryConfig {
 
 export type ResolvedApiQueryConfig = Required<ApiQueryConfig> & { parameters: Required<ApiQueryConfigParameters> };
 
+export type EnumType<T> = T[keyof T];
+
 export interface Sort<Model extends LucidModel> {
-  handle(query: ModelQueryBuilderContract<Model, InstanceType<Model>>, descending: boolean, property: string): void;
+  handle: (query: ModelQueryBuilderContract<Model, InstanceType<Model>>, isDescending: boolean, property: string) => void;
 }
 
 export interface Filter<Model extends LucidModel> {
-  handle(
+  handle: (
     query: ModelQueryBuilderContract<Model, InstanceType<Model>>,
     value: StrictValuesWithoutRaw | null,
     property: string,
-  ): void;
+  ) => void;
 }
 
 export interface Include<ParentModel extends LucidModel> {
-  handle(query: ModelQueryBuilderContract<ParentModel, InstanceType<ParentModel>>, include: string): void;
+  handle: (query: ModelQueryBuilderContract<ParentModel, InstanceType<ParentModel>>, include: string) => void;
 }
 
 export type ExtractKeys<T> = T extends object
@@ -109,8 +111,8 @@ export type ExtractKeysWithSort<T> = T extends object
     }[keyof T & string]
   : never;
 
-export type SortUnionKeyParams<Model extends LucidModel> =
-  | ExtractKeys<ModelAttributes<InstanceType<Model>>>
-  | ExtractKeysWithSort<ModelAttributes<InstanceType<Model>>>;
+export type SortUnionKeyParams<Model extends LucidModel>
+  = | ExtractKeys<ModelAttributes<InstanceType<Model>>>
+    | ExtractKeysWithSort<ModelAttributes<InstanceType<Model>>>;
 
 export type HintedString<KnownValues> = KnownValues extends string ? (string & {}) | KnownValues : never;

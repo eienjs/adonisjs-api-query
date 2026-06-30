@@ -1,18 +1,48 @@
+import type { LucidModel, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import type { ModelRelations } from '@adonisjs/lucid/types/relations';
+import type { Include } from './types.js';
 import app from '@adonisjs/core/services/app';
-import { type LucidModel, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
-import { type ModelRelations } from '@adonisjs/lucid/types/relations';
 import { Collection } from 'collect.js';
 import { IncludedCallback } from './includes/included_callback.js';
 import { IncludedCount } from './includes/included_count.js';
 import { IncludedRelationship } from './includes/included_relationship.js';
-import { type Include } from './types.js';
 
 export class AllowedInclude<Model extends LucidModel> {
+  protected internalName: string;
+
+  protected name: string;
+
+  protected includeClass: Include<Model>;
+
+  public constructor(name: string, includeClass: Include<Model>, internalName?: string) {
+    this.name = name;
+    this.includeClass = includeClass;
+    this.internalName = internalName ?? this.name;
+  }
+
+  public include(query: ModelQueryBuilderContract<Model>): void {
+    // if ('getRequestedFieldsForRelatedTable' in this.includeClass) {
+    //   this.includeClass.getRequestedFieldsForRelatedTable = (relationship: string) => {
+    //     return query.getRequestedFieldsForRelatedTable(relationship);
+    //   };
+    // }
+
+    this.includeClass.handle(query, this.internalName);
+  }
+
+  public getName(): string {
+    return this.name;
+  }
+
+  public isForInclude(includeName: string): boolean {
+    return this.name === includeName;
+  }
+
   public static relationship<ParentModel extends LucidModel>(
     name: string,
     internalName?: string,
   ): Collection<AllowedInclude<ParentModel>> {
-    internalName = internalName ?? name;
+    internalName ??= name;
 
     return IncludedRelationship.getIndividualRelationshipPathsFromInclude(internalName)
       .zip(IncludedRelationship.getIndividualRelationshipPathsFromInclude(name).toArray<string>())
@@ -25,7 +55,7 @@ export class AllowedInclude<Model extends LucidModel> {
 
         if (!relationship.includes('.')) {
           const countSuffix = app.config.get<string>('apiquery.countSuffix', 'Count');
-          for (const countAllowedInclude of AllowedInclude.count(
+          for (const countAllowedInclude of this.count(
             `${alias}${countSuffix}`,
             `${relationship}${countSuffix}`,
           )) {
@@ -64,35 +94,5 @@ export class AllowedInclude<Model extends LucidModel> {
     internalName?: string,
   ): Collection<AllowedInclude<ParentModel>> {
     return new Collection([new AllowedInclude<ParentModel>(name, includeClass, internalName)]);
-  }
-
-  protected internalName: string;
-
-  protected name: string;
-
-  protected includeClass: Include<Model>;
-
-  public constructor(name: string, includeClass: Include<Model>, internalName?: string) {
-    this.name = name;
-    this.includeClass = includeClass;
-    this.internalName = internalName ?? this.name;
-  }
-
-  public include(query: ModelQueryBuilderContract<Model>): void {
-    // if ('getRequestedFieldsForRelatedTable' in this.includeClass) {
-    //   this.includeClass.getRequestedFieldsForRelatedTable = (relationship: string) => {
-    //     return query.getRequestedFieldsForRelatedTable(relationship);
-    //   };
-    // }
-
-    this.includeClass.handle(query, this.internalName);
-  }
-
-  public getName(): string {
-    return this.name;
-  }
-
-  public isForInclude(includeName: string): boolean {
-    return this.name === includeName;
   }
 }

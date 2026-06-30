@@ -1,38 +1,13 @@
-import { type LucidModel, type ModelAttributes, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import type { LucidModel, ModelAttributes, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import type { ExtractKeys, Sort } from './types.js';
 import { SortDirection } from './enums/sort_direction.js';
 import { InvalidDirection } from './exceptions/invalid_direction.js';
 import { SortsCallback } from './sorts/sorts_callback.js';
 import { SortsField } from './sorts/sorts_field.js';
-import { type ExtractKeys, type Sort } from './types.js';
+
+const REMOVE_HYPHEN_STARTING_IN_ANY_POSITION = /^-+/;
 
 export class AllowedSort<Model extends LucidModel> {
-  public static parseSortDirection(name: string): string {
-    return name.startsWith('-') ? SortDirection.Descending : SortDirection.Ascending;
-  }
-
-  public static field<Model extends LucidModel>(
-    name: string,
-    internalName?: ExtractKeys<ModelAttributes<InstanceType<Model>>>,
-  ): AllowedSort<Model> {
-    return new AllowedSort<Model>(name, new SortsField<Model>(), internalName);
-  }
-
-  public static custom<Model extends LucidModel>(
-    name: string,
-    sortClass: Sort<Model>,
-    internalName?: ExtractKeys<ModelAttributes<InstanceType<Model>>>,
-  ): AllowedSort<Model> {
-    return new AllowedSort<Model>(name, sortClass, internalName);
-  }
-
-  public static callback<Model extends LucidModel>(
-    name: string,
-    callback: (query: ModelQueryBuilderContract<Model>, descending: boolean, property: string) => void,
-    internalName?: ExtractKeys<ModelAttributes<InstanceType<Model>>>,
-  ): AllowedSort<Model> {
-    return new AllowedSort<Model>(name, new SortsCallback<Model>(callback), internalName);
-  }
-
   protected defaultDirection: string;
 
   protected internalName: string;
@@ -46,16 +21,16 @@ export class AllowedSort<Model extends LucidModel> {
     sortClass: Sort<Model>,
     internalName?: ExtractKeys<ModelAttributes<InstanceType<Model>>>,
   ) {
-    this.name = name.replace(/^-+/, '');
+    this.name = name.replace(REMOVE_HYPHEN_STARTING_IN_ANY_POSITION, '');
     this.defaultDirection = AllowedSort.parseSortDirection(name);
     this.sortClass = sortClass;
     this.internalName = internalName ?? this.name;
   }
 
-  public sort(query: ModelQueryBuilderContract<Model>, descending?: boolean): void {
-    descending = descending ?? this.defaultDirection === SortDirection.Descending;
+  public sort(query: ModelQueryBuilderContract<Model>, isDescending?: boolean): void {
+    isDescending ??= this.defaultDirection === SortDirection.Descending;
 
-    this.sortClass.handle(query, descending, this.internalName);
+    this.sortClass.handle(query, isDescending, this.internalName);
   }
 
   public getName(): string {
@@ -78,5 +53,32 @@ export class AllowedSort<Model extends LucidModel> {
     this.defaultDirection = defaultDirection;
 
     return this;
+  }
+
+  public static parseSortDirection(name: string): string {
+    return name.startsWith('-') ? SortDirection.Descending : SortDirection.Ascending;
+  }
+
+  public static field<Model extends LucidModel>(
+    name: string,
+    internalName?: ExtractKeys<ModelAttributes<InstanceType<Model>>>,
+  ): AllowedSort<Model> {
+    return new AllowedSort<Model>(name, new SortsField<Model>(), internalName);
+  }
+
+  public static custom<Model extends LucidModel>(
+    name: string,
+    sortClass: Sort<Model>,
+    internalName?: ExtractKeys<ModelAttributes<InstanceType<Model>>>,
+  ): AllowedSort<Model> {
+    return new AllowedSort<Model>(name, sortClass, internalName);
+  }
+
+  public static callback<Model extends LucidModel>(
+    name: string,
+    callback: (query: ModelQueryBuilderContract<Model>, isDescending: boolean, property: string) => void,
+    internalName?: ExtractKeys<ModelAttributes<InstanceType<Model>>>,
+  ): AllowedSort<Model> {
+    return new AllowedSort<Model>(name, new SortsCallback<Model>(callback), internalName);
   }
 }

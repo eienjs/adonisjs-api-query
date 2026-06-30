@@ -1,6 +1,6 @@
+import type { ApplicationService } from '@adonisjs/core/types';
 import { RequestFactory } from '@adonisjs/core/factories/http';
 import { setApp } from '@adonisjs/core/services/app';
-import { type ApplicationService } from '@adonisjs/core/types';
 import { test } from '@japa/runner';
 import collect from 'collect.js';
 import { DateTime } from 'luxon';
@@ -29,7 +29,7 @@ test.group('filter', (group) => {
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
 
-    return () => app.terminate();
+    return async () => app.terminate();
   });
 
   test('can filter models by partial property by default', async ({ assert }) => {
@@ -466,7 +466,7 @@ test.group('filter', (group) => {
     });
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
-    cleanup(() => customApp.terminate());
+    cleanup(async () => customApp.terminate());
 
     const query = createQueryFromFilterRequest({
       name: 'John',

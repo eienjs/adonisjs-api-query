@@ -3,7 +3,7 @@ export const substrReplace = (str: string, replace: string, start: number, lengt
     start += str.length;
   }
 
-  length = length ?? str.length;
+  length ??= str.length;
   if (length < 0) {
     length = length + str.length - start;
   }

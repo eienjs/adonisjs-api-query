@@ -1,6 +1,6 @@
+import type { ConfigProvider } from '@adonisjs/core/types';
+import type { ApiQueryConfig, ResolvedApiQueryConfig } from './types.js';
 import { configProvider } from '@adonisjs/core';
-import { type ConfigProvider } from '@adonisjs/core/types';
-import { type ApiQueryConfig, type ResolvedApiQueryConfig } from './types.js';
 
 export const defineConfig = function (config: ApiQueryConfig): ConfigProvider<ResolvedApiQueryConfig> {
   return configProvider.create(async (_) => {

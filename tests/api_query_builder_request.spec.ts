@@ -1,6 +1,6 @@
+import type { ApplicationService } from '@adonisjs/core/types';
 import { RequestFactory } from '@adonisjs/core/factories/http';
 import { setApp } from '@adonisjs/core/services/app';
-import { type ApplicationService } from '@adonisjs/core/types';
 import { test } from '@japa/runner';
 import collect from 'collect.js';
 import { ApiQueryBuilderRequest } from '../src/api_query_builder_request.js';
@@ -14,7 +14,7 @@ test.group('query builder request', (group) => {
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
 
-    return () => app.terminate();
+    return async () => app.terminate();
   });
 
   test('can filter nested records', ({ assert }) => {

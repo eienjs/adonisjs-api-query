@@ -2,13 +2,13 @@
 
 Missing features and improvements for the AdonisJS Api Query package.
 
-### Todo
+## Todo
 
 - [ ] Filters scope support
 - [ ] Filters belongs to support
 - [ ] Includes fields support
 - [ ] Includes exists support
 
-### In Progress
+## In Progress
 
-### Done ✓
+## Done ✓

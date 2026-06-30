@@ -1,15 +1,15 @@
+import type { ApplicationService } from '@adonisjs/core/types';
+import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import type { ExtractModelRelations } from '@adonisjs/lucid/types/relations';
+import type { Collection } from 'collect.js';
+import type { Include } from '../src/types.js';
 import { RequestFactory } from '@adonisjs/core/factories/http';
 import { setApp } from '@adonisjs/core/services/app';
-import { type ApplicationService } from '@adonisjs/core/types';
-import { type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
-import { type ExtractModelRelations } from '@adonisjs/lucid/types/relations';
 import { test } from '@japa/runner';
-import { type Collection } from 'collect.js';
 import { AllowedInclude } from '../src/allowed_include.js';
 import { ApiQueryBuilderRequest } from '../src/api_query_builder_request.js';
 import { defineConfig } from '../src/define_config.js';
 import { InvalidIncludeQuery } from '../src/exceptions/invalid_include_query.js';
-import { type Include } from '../src/types.js';
 import { TestModelFactory } from './_helpers/factories/test_model.js';
 import RelatedModel from './_helpers/models/related_model.js';
 import TestModel from './_helpers/models/test_model.js';
@@ -44,7 +44,7 @@ test.group('include', (group) => {
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
 
-    return () => app.terminate();
+    return async () => app.terminate();
   });
 
   test('does not require includes', async ({ assert }) => {
@@ -191,7 +191,7 @@ test.group('include', (group) => {
     });
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
-    cleanup(() => customApp.terminate());
+    cleanup(async () => customApp.terminate());
     await createInitModels(customApp, 0);
     await createQueryFromIncludeRequest('randomModel').allowedIncludes('relatedModels').exec();
 

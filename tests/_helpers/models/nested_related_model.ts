@@ -1,5 +1,5 @@
+import type { BelongsTo } from '@adonisjs/lucid/types/relations';
 import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm';
-import { type BelongsTo } from '@adonisjs/lucid/types/relations';
 import RelatedModel from './related_model.js';
 
 export default class NestedRelatedModel extends BaseModel {

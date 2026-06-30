@@ -1,5 +1,5 @@
+import type { ManyToMany } from '@adonisjs/lucid/types/relations';
 import { BaseModel, column, manyToMany } from '@adonisjs/lucid/orm';
-import { type ManyToMany } from '@adonisjs/lucid/types/relations';
 import TestModel from './test_model.js';
 
 export default class RelatedThroughPivotModel extends BaseModel {

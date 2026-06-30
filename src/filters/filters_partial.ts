@@ -1,7 +1,7 @@
-import { type DialectContract } from '@adonisjs/lucid/types/database';
-import { type LucidModel, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
-import { type StrictValuesWithoutRaw } from '@adonisjs/lucid/types/querybuilder';
-import { type Filter } from '../types.js';
+import type { DialectContract } from '@adonisjs/lucid/types/database';
+import type { LucidModel, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import type { StrictValuesWithoutRaw } from '@adonisjs/lucid/types/querybuilder';
+import type { Filter } from '../types.js';
 import { FiltersExact } from './filters_exact.js';
 
 export class FiltersPartial<Model extends LucidModel> extends FiltersExact<Model> implements Filter<Model> {
@@ -10,19 +10,20 @@ export class FiltersPartial<Model extends LucidModel> extends FiltersExact<Model
     value: StrictValuesWithoutRaw | null,
     property: string,
   ): void {
-    if (this.addRelationConstraint && this.isRelationProperty(query, property)) {
+    if (this.shouldAddRelationConstraint && this.isRelationProperty(query, property)) {
       this.withRelationConstraint(query, value, property);
 
       return;
     }
 
     if (Array.isArray(value)) {
-      if (value.filter((item) => item.toString().length > 0).length === 0) {
+      if (value.every((item) => item.toString().length === 0)) {
         return;
       }
 
       void query.where((subQuery) => {
-        for (const partialValue of value.filter((item) => item.toString().length > 0)) {
+        const subValues = value.filter((item) => item.toString().length > 0);
+        for (const partialValue of subValues) {
           const [innerSql, innerBindings] = this.getWhereRawParameters(
             partialValue,
             this.parsePropertyToColumn(subQuery, property),
@@ -54,9 +55,9 @@ export class FiltersPartial<Model extends LucidModel> extends FiltersExact<Model
   }
 
   protected getWhereRawParameters(value: StrictValuesWithoutRaw | null, property: string): [string, string[]] {
-    const resolvedValue = `${value}`.toLowerCase();
+    const resolvedValue = String(value).toLowerCase();
 
-    return [`LOWER(??) LIKE ?`, [property, `%${FiltersPartial.escapeLike(resolvedValue)}%`]];
+    return ['LOWER(??) LIKE ?', [property, `%${FiltersPartial.escapeLike(resolvedValue)}%`]];
   }
 
   protected static escapeLike(value: string): string {

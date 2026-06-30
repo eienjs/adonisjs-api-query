@@ -1,19 +1,19 @@
+import type { ApplicationService } from '@adonisjs/core/types';
+import type { AppEnvironments } from '@adonisjs/core/types/app';
+import type { Database } from '@adonisjs/lucid/database';
+import type { FactoryBuilderQueryContract, FactoryModelContract } from '@adonisjs/lucid/types/factory';
+import type { LucidModel, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import type { TestContext } from '@japa/runner/core';
+import type { ApiQueryConfig } from '../../src/types.js';
 import { existsSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { URL } from 'node:url';
 import { IgnitorFactory } from '@adonisjs/core/factories';
 import { RequestFactory } from '@adonisjs/core/factories/http';
-import { type ApplicationService } from '@adonisjs/core/types';
-import { type AppEnvironments } from '@adonisjs/core/types/app';
 import { defineConfig as defineLucidConfig } from '@adonisjs/lucid';
-import { type Database } from '@adonisjs/lucid/database';
-import { type FactoryBuilderQueryContract, type FactoryModelContract } from '@adonisjs/lucid/types/factory';
-import { type LucidModel, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
 import { getActiveTest } from '@japa/runner';
-import { type TestContext } from '@japa/runner/core';
 import { defineConfig } from '../../src/define_config.js';
-import { type ApiQueryConfig } from '../../src/types.js';
 import TestModel from './models/test_model.js';
 
 export const defaultConfigApiQuery: ApiQueryConfig = {
@@ -49,8 +49,8 @@ export const setupApp = async function (
     .merge({
       config: {
         database:
-          config.database ??
-          defineLucidConfig({
+          config.database
+          ?? defineLucidConfig({
             connection: 'sqlite',
             connections: {
               sqlite: {
@@ -64,14 +64,14 @@ export const setupApp = async function (
       },
       rcFileContents: {
         providers: [
-          () => import('@adonisjs/lucid/database_provider'),
-          () => import('adonis-lucid-soft-deletes/provider'),
-          () => import('../../providers/api_query_provider.js'),
+          async () => import('@adonisjs/lucid/database_provider'),
+          async () => import('@codenameryuu/adonis-lucid-soft-deletes/provider'),
+          async () => import('../../providers/api_query_provider.js'),
         ],
       },
     })
     .create(context.fs.baseUrl, {
-      importer: (filePath) => {
+      importer: async (filePath) => {
         if (filePath.startsWith('./') || filePath.startsWith('../')) {
           return import(new URL(filePath, context.fs.baseUrl).href);
         }

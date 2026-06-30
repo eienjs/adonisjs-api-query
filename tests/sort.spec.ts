@@ -1,6 +1,6 @@
+import type { ApplicationService } from '@adonisjs/core/types';
 import { RequestFactory } from '@adonisjs/core/factories/http';
 import { setApp } from '@adonisjs/core/services/app';
-import { type ApplicationService } from '@adonisjs/core/types';
 import { test } from '@japa/runner';
 import { Collection } from 'collect.js';
 import { DateTime } from 'luxon';
@@ -31,7 +31,7 @@ test.group('sort', (group) => {
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
 
-    return () => app.terminate();
+    return async () => app.terminate();
   });
 
   test('can sort a query ascending', async ({ assert }) => {
@@ -147,7 +147,7 @@ test.group('sort', (group) => {
     });
     setApp(app);
     ApiQueryBuilderRequest.resetDelimiters();
-    cleanup(() => customApp.terminate());
+    cleanup(async () => customApp.terminate());
     const query = createQueryFromSortRequest('name').allowedSorts('id');
 
     assert.equal(query.toQuery(), 'select * from `test_models`');

@@ -1,7 +1,7 @@
+import type { LucidModel, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
+import type { ExtractModelRelations } from '@adonisjs/lucid/types/relations';
+import type { Include } from '../types.js';
 import app from '@adonisjs/core/services/app';
-import { type LucidModel, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model';
-import { type ExtractModelRelations } from '@adonisjs/lucid/types/relations';
-import { type Include } from '../types.js';
 
 export class IncludedCount<ParentModel extends LucidModel> implements Include<ParentModel> {
   public handle(query: ModelQueryBuilderContract<ParentModel, InstanceType<ParentModel>>, count: string): void {
