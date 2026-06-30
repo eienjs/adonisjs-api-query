@@ -7,11 +7,37 @@
 [![Build Status][badge-build]][build]
 [![Total Downloads][badge-downloads]][downloads]
 
-> Easily build Lucid queries from API requests
+> Easily build Lucid queries from API requests for your AdonisJS v7 application.
 
 ## Introduction
 
 This package provides a set of macros on `ModelQueryBuilder` to build [Lucid](https://adonisjs.com/docs/lucid) queries from API requests. Inspired by [Spatie's Laravel Query Builder](https://github.com/spatie/laravel-query-builder).
+
+## Quick Start
+
+Install the package using the following command:
+
+```sh
+node ace add @eienjs/adonisjs-api-query
+```
+
+Automatically the command will register the provider. Now you can use with your controller response:
+
+```typescript
+import type { HttpContext } from '@adonisjs/core/http';
+import User from '#models/user';
+
+// inside a controller
+export default class MyController {
+  public async handle({ request }: HttpContext) {
+    const users = await User.query()
+      .withRequest(request) // Pass the request to the query builder if async local storage is not enabled
+      .allowedFilters('name')
+      .allowedIncludes('posts')
+      .allowedSorts('id');
+  }
+}
+```
 
 ## Documentation
 
@@ -30,7 +56,7 @@ The `@eienjs/adonisjs-api-query` library is licensed for use under the MIT Licen
 [source]: https://github.com/eienjs/adonisjs-api-query
 [node-version]: https://www.npmjs.com/package/@eienjs/adonisjs-api-query
 [release]: https://www.npmjs.com/package/@eienjs/adonisjs-api-query
-[license]: https://github.com/eienjs/adonisjs-api-query/blob/main/LICENSE.md
+[license]: https://github.com/eienjs/adonisjs-api-query/blob/main/LICENSE
 [build]: https://github.com/eienjs/adonisjs-api-query/actions/workflows/build.yml?query=branch:main
 [downloads]: https://www.npmjs.com/package/@eienjs/adonisjs-api-query
 [badge-source]: https://img.shields.io/badge/source-eienjs/adonisjs--api--query-blue.svg?logo=github
